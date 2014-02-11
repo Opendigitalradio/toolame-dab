@@ -905,6 +905,8 @@ void parse_args (int argc, char **argv, frame_info * frame, int *psy,
     if ((header->bitrate_index = BitrateIndex (brate, header->version)) < 0)
         err = 1;
 
+    bs.zmq_framesize = 3 * brate;
+
     /* All options are hunky dory, open the input audio file and
        return to the main drag */
     open_bit_stream_w (&bs, outPath, BUFFER_SIZE);
