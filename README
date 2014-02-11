@@ -1,7 +1,12 @@
-                                                                                
-tooLAME - an optimized mpeg 1/2 layer 2 audio encoder
+
+tooLAME - an optimized mpeg 1/2 layer 2 audio encoder with
+ODR-DabMux compatible ZeroMQ output
+
 Copyright (C) 2002, 2003 Michael Cheng [mikecheng at NOT planckenergy.com] remove the NOT
 http://www.planckenergy.com/
+
+Copyright (C) 2014 Matthias P. Braendli [matthias@mpb.li]
+http://opendigitalradio.org/
 
 All changes to the ISO source are licensed under the LGPL  
 (see LGPL.txt for details)
@@ -25,17 +30,21 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 INTRODUCTION
 *********************
 
-tooLAME is an optimized Mpeg Audio 1/2 Layer 2 encoder.  It is based heavily on 
-    - the ISO dist10 code 
+tooLAME is an optimized Mpeg Audio 1/2 Layer 2 encoder.  It is based heavily on
+    - the ISO dist10 code
     - improvement to algorithms as part of the LAME project (www.sulaco.org/mp3)
     - work by myself and other contributors (see CONTRIBUTORS)
+
+It can encode to a file, and also to a zeromq socket that can connect to ODR-DabMux
+See http://opendigitalradio.org
 
 *********************
 INSTALLATION
 *********************
 
-1. edit Makefile 
-   at least change the architecture type (ARCH) to suit your machine.
+0. install zeromq 4.0.3
+1. edit Makefile
+   maybe change the architecture type (ARCH) to suit your machine.
 2. 'make'
 
 *********************
@@ -52,6 +61,8 @@ Input File
 Output File
 	file is automatically renamed from *.* to *.mp2
 	for stdout use a -
+    for zeromq use tcp://<hostname>:<port> pointing to
+        a ODR-DabMux
 
 Input Options
 	-s [int]
@@ -194,6 +205,9 @@ Sami Sallinen - sami.sallinen at g-cluster.com
 Mike Cheng <mikecheng at NOT planckenergy.com> (remove the NOT)
 	Most of the rest 
 
+Matthias P. Braendli <matthias@mpb.li>
+    ZeroMQ output for ODR-DabMux
+
 *********************
 REFERENCE PAPERS
 *********************
@@ -222,3 +236,5 @@ Hans, M & Bhaskaran, V., A compliant MPEG-1 layer II audio decoder with 16-B
 arithmetic operations, IEEE Signal Proc Letters v4 n5 1997 p121
 
 [mikecheng at NOT planckenergy.com] remove the NOT
+and
+[matthias@mpb.li]

@@ -521,8 +521,8 @@ void usage (void)
 {				/* print syntax & exit */
     /* FIXME: maybe have an option to display better definitions of help codes, and
        long equivalents of the flags */
-    fprintf (stdout, "\ntooLAME version %s (http://toolame.sourceforge.net)\n",
-            toolameversion);
+    fprintf (stdout, "\ntooLAME version %s with ZMQ support for ODR-DabMux\n"
+            "   (http://www.opendigitalradio.org)\n", toolameversion);
     fprintf (stdout, "MPEG Audio Layer II encoder\n\n");
     fprintf (stdout, "usage: \n");
     fprintf (stdout, "\t%s [options] <input> <output>\n\n", programName);
@@ -559,7 +559,9 @@ void usage (void)
     fprintf (stdout, "Files\n");
     fprintf (stdout,
             "\tinput    input sound file. (WAV,AIFF,PCM or use '/dev/stdin')\n");
-    fprintf (stdout, "\toutput   output bit stream of encoded audio\n");
+    fprintf (stdout, "\toutput   output file name for encoded bitstream\n");
+    fprintf (stdout, "\t    -or- output URI for ZeroMQ output,\n");
+    fprintf (stdout, "\t         format: tcp://<hostname>:<port>\n");
     fprintf (stdout,
             "\n\tAllowable bitrates for 16, 22.05 and 24kHz sample input\n");
     fprintf (stdout,

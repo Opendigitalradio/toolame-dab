@@ -119,5 +119,8 @@ v0.2l	- Released 3 March 2003
 	- Rewrote the bitstream encoding routines
         - Sped up the sin/cos/atan stuff in psymodel 4 (using tables now)
          
+v0.2l with ZMQ output - February 2014
+    - added outputzmq.{h, c}
+      Matthias P. Braendli
 
 mike (mikecheng at NOT planckenergy.com) [remove the NOT]
