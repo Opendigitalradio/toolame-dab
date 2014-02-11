@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <zmq.h>
 #include <string.h>
+#include "zmqoutput.h"
 #include "common.h"
 #include "mem.h"
 #include "bitstream.h"
@@ -104,52 +104,27 @@ int refill_buffer (Bit_stream_struc * bs)
 /* empty the buffer to the output device when the buffer becomes full */
 void empty_buffer (Bit_stream_struc * bs, int minimum)
 {
-    register int i;
+    int i;
 
     if (bs->pt) {
         for (i = bs->buf_size - 1; i >= minimum; i--)
             fwrite (&bs->buf[i], sizeof (unsigned char), 1, bs->pt);
 
         fflush (bs->pt);		/* NEW SS to assist in debugging */
-
-        for (i = minimum - 1; i >= 0; i--)
-            bs->buf[bs->buf_size - minimum + i] = bs->buf[i];
-
-        bs->buf_byte_idx = bs->buf_size - 1 - minimum;
-        bs->buf_bit_idx = 8;
+    }
+    else if (bs->zmq_sock) {
+        for (i = bs->buf_size - 1; i >= minimum; i--)
+            zmqoutput_write_byte(bs, bs->buf[i]);
     }
 
-    if (bs->zmq_sock) {
-        unsigned char outbuf[bs->zmq_framesize];
+    for (i = minimum - 1; i >= 0; i--)
+        bs->buf[bs->buf_size - minimum + i] = bs->buf[i];
 
-        int j = 0;
-        for (i = bs->buf_size - 1; i >= minimum; i--) {
-            outbuf[j++] = bs->buf[i];
-            if (j >= bs->zmq_framesize)
-                break;
-        }
+    bs->buf_byte_idx = bs->buf_size - 1 - minimum;
+    bs->buf_bit_idx = 8;
 
-        if (j < bs->zmq_framesize) {
-            fprintf(stderr, "not enough data in buffer ! j=%d, req'd %d",
-                    j, bs->zmq_framesize);
-        }
-
-        int send_error = zmq_send(bs->zmq_sock, outbuf, bs->zmq_framesize,
-                ZMQ_DONTWAIT);
-
-        if (send_error < 0) {
-            fprintf(stderr, "ZeroMQ send failed! %s\n", zmq_strerror(errno));
-        }
-
-        for (i = minimum - 1; i >= 0; i--)
-            bs->buf[bs->buf_size - minimum + i] = bs->buf[i];
-
-        bs->buf_byte_idx = bs->buf_size - 1 - minimum;
-        bs->buf_bit_idx = 8;
-    }
 }
 
-static void *zmq_context;
 
 /* open the device to write the bit stream into it */
 void open_bit_stream_w (Bit_stream_struc * bs, char *bs_filenam, int size)
@@ -159,20 +134,11 @@ void open_bit_stream_w (Bit_stream_struc * bs, char *bs_filenam, int size)
     if (bs_filenam[0] == '-')
         bs->pt = stdout;
     else if (strncmp(bs_filenam, "tcp://", 4) == 0) {
-        zmq_context = zmq_ctx_new();
-        bs->zmq_sock = zmq_socket(zmq_context, ZMQ_PUB);
-        if (bs->zmq_sock == NULL) {
-            fprintf(stderr, "Error occurred during zmq_socket: %s\n",
-                    zmq_strerror(errno));
-            abort();
+        if (zmqoutput_open(bs, bs_filenam) != 0) {
+            fprintf(stderr, "Could not initialise ZMQ\n");
+            exit(1);
         }
-        if (zmq_connect(bs->zmq_sock, bs_filenam) != 0) {
-            fprintf(stderr, "Error occurred during zmq_connect: %s\n",
-                    zmq_strerror(errno));
-            abort();
-        }
-
-        bs->pt = NULL;
+        bs->pt = NULL; // we're not using file output
     }
     else if ((bs->pt = fopen (bs_filenam, "wb")) == NULL) {
         fprintf (stderr, "Could not create \"%s\".\n", bs_filenam);
@@ -192,7 +158,8 @@ void close_bit_stream_w (Bit_stream_struc * bs)
 {
     putbits (bs, 0, 7);
     empty_buffer (bs, bs->buf_byte_idx + 1);
-    fclose (bs->pt);
+    if (bs->pt) fclose(bs->pt);
+    zmqoutput_close(bs);
     desalloc_buffer (bs);
 }
 

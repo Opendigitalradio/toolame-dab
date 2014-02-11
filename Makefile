@@ -22,7 +22,8 @@ c_sources = \
 	tables.c \
 	availbits.c \
 	ath.c \
-	encode_new.c
+	encode_new.c \
+	zmqoutput.c
 
 OBJ = $(c_sources:.c=.o)
 

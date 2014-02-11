@@ -87,6 +87,9 @@
 *
 ***********************************************************************/
 
+#include <stdio.h>
+#include <stdlib.h>
+
 /* Structure for Reading Layer II Allocation Tables from File */
 
 typedef struct
