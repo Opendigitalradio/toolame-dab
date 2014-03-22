@@ -329,11 +329,15 @@ parse_input_file (FILE * musicin, char inPath[MAX_NAME_SIZE], frame_header *head
       }
     }
     if (NativeByteOrder == order_littleEndian) {
-      samplerate = *(unsigned long *) (&wave_header_buffer[24]);
+      samplerate = wave_header_buffer[24] +
+        (wave_header_buffer[25] << 8) +
+        (wave_header_buffer[26] << 16) +
+        (wave_header_buffer[27] << 24);
     } else {
       samplerate = wave_header_buffer[27] +
         (wave_header_buffer[26] << 8) +
-        (wave_header_buffer[25] << 16) + (wave_header_buffer[24] << 24);
+        (wave_header_buffer[25] << 16) +
+        (wave_header_buffer[24] << 24);
     }
     /* Wave File */
     wave_header_read = 1;
