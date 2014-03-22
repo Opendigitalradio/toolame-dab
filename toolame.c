@@ -20,13 +20,14 @@
 #include "subband.h"
 #include "encode_new.h"
 #include "toolame.h"
+#include "xpad.h"
 
 #include <assert.h>
 
 FILE *musicin;
 Bit_stream_struc bs;
 char *programName;
-char toolameversion[10] = "0.2l";
+char toolameversion[10] = "0.2l-pad";
 
 void global_init (void)
 {
@@ -391,9 +392,24 @@ int main (int argc, char **argv)
         /* If not all the bits were used, write out a stack of zeros */
         for (i = 0; i < adb; i++)
             put1bit (&bs, 0);
+
         if (header.dab_extension) {
-            /* Reserve some bytes for X-PAD in DAB mode */
-            putbits (&bs, 0, header.dab_length * 8);
+            if (xpad_len()) {
+                /* Reserve some bytes for X-PAD in DAB mode */
+
+                /* always fill it entirely
+                for (i=header.dab_length-xpad_len(); i>0; i--) {
+                    putbits(&bs, 0, 8);
+                }
+                */
+
+                for (i = 0; i < header.dab_length; i++) {
+                    putbits (&bs, xpad_byte(), 8);
+                }
+            }
+            else {
+                fprintf(stderr, "error getting xpad!\n");
+            }
 
             for (i = header.dab_extension - 1; i >= 0; i--) {
                 CRC_calcDAB (&frame, bit_alloc, scfsi, scalar, &crc, i);
@@ -403,7 +419,10 @@ int main (int argc, char **argv)
                 /* reserved 2 bytes for F-PAD in DAB mode  */
                 putbits (&bs, crc, 8);
             }
-            putbits (&bs, 0, 16);
+            putbits (&bs, xpad_fpad(), 16);	// CI
+
+            //header.dab_length = xpad_len();	// set xpad-length for next frame
+
         }
 
         frameBits = sstell (&bs) - sentBits;
@@ -521,8 +540,8 @@ void usage (void)
 {				/* print syntax & exit */
     /* FIXME: maybe have an option to display better definitions of help codes, and
        long equivalents of the flags */
-    fprintf (stdout, "\ntooLAME version %s with ZMQ support for ODR-DabMux\n"
-            "   (http://www.opendigitalradio.org)\n", toolameversion);
+    fprintf (stdout, "\ntooLAME version %s (http://toolame.sourceforge.net)\n",
+            toolameversion);
     fprintf (stdout, "MPEG Audio Layer II encoder\n\n");
     fprintf (stdout, "usage: \n");
     fprintf (stdout, "\t%s [options] <input> <output>\n\n", programName);
@@ -554,14 +573,13 @@ void usage (void)
     fprintf (stdout, "\t-o       mark as original\n");
     fprintf (stdout, "\t-e       add error protection\n");
     fprintf (stdout, "\t-r       force padding bit/frame off\n");
-    fprintf (stdout, "\t-D len   add DAB extensions of length [len]\n");
+    fprintf (stdout, "\t-D portnum  activate DAB-mode. Listen for pad data on port portnum\n");
     fprintf (stdout, "\t-t       talkativity 0=no messages (dflt 2)");
     fprintf (stdout, "Files\n");
     fprintf (stdout,
             "\tinput    input sound file. (WAV,AIFF,PCM or use '/dev/stdin')\n");
-    fprintf (stdout, "\toutput   output file name for encoded bitstream\n");
-    fprintf (stdout, "\t    -or- output URI for ZeroMQ output,\n");
-    fprintf (stdout, "\t         format: tcp://<hostname>:<port>\n");
+    fprintf (stdout, "\toutput   output bit stream of encoded audio\n");
+    fprintf (stdout, "\t         prefix with tcp:// to use a ZMQ output\n");
     fprintf (stdout,
             "\n\tAllowable bitrates for 16, 22.05 and 24kHz sample input\n");
     fprintf (stdout,
@@ -775,9 +793,11 @@ void parse_args (int argc, char **argv, frame_info * frame, int *psy,
                         break;
                     case 'D':
                         argUsed = 1;
-                        header->dab_length = atoi (arg);
+                        header->dab_length = atoi(arg);
+                        //header->dab_length = xpad_len();
                         header->error_protection = TRUE;
                         header->dab_extension = 2;
+                        header->padding = 0;
                         glopts.dab = TRUE;
                         break;
                     case 'c':
