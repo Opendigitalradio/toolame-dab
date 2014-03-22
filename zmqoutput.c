@@ -51,7 +51,11 @@ int zmqoutput_write_byte(Bit_stream_struc *bs, unsigned char data)
         }
 
         zmqbuf_len = 0;
+
+        return bs->zmq_framesize;
     }
+
+    return 0;
 
 }
 
