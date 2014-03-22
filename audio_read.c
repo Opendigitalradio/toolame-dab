@@ -22,7 +22,7 @@
 
 unsigned long
 read_samples (FILE * musicin, short sample_buffer[2304],
-	      unsigned long num_samples, unsigned long frame_size)
+              unsigned long num_samples, unsigned long frame_size)
 {
   unsigned long samples_read;
   static unsigned long samples_to_read;
@@ -38,7 +38,7 @@ read_samples (FILE * musicin, short sample_buffer[2304],
     samples_read = samples_to_read;
   if ((samples_read =
        fread (sample_buffer, sizeof (short), (int) samples_read,
-	      musicin)) == 0)
+              musicin)) == 0)
     fprintf (stderr, "Hit end of audio data\n");
   /*
      Samples are big-endian. If this is a little-endian machine
@@ -78,24 +78,24 @@ read_samples (FILE * musicin, short sample_buffer[2304],
 ************************************************************************/
 unsigned long
 get_audio (FILE * musicin, short buffer[2][1152], unsigned long num_samples,
-	   int nch, frame_header *header)
+           int nch, frame_header *header)
 {
   int j;
   short insamp[2304];
   unsigned long samples_read;
 
-  if (nch == 2) {		/* stereo */
+  if (nch == 2) {               /* stereo */
     samples_read =
       read_samples (musicin, insamp, num_samples, (unsigned long) 2304);
     if (glopts.channelswap == TRUE) {
       for (j = 0; j < 1152; j++) {
-	buffer[1][j] = insamp[2 * j];
-	buffer[0][j] = insamp[2 * j + 1];
+        buffer[1][j] = insamp[2 * j];
+        buffer[0][j] = insamp[2 * j + 1];
       }
     } else {
       for (j = 0; j < 1152; j++) {
-	buffer[0][j] = insamp[2 * j];
-	buffer[1][j] = insamp[2 * j + 1];
+        buffer[0][j] = insamp[2 * j];
+        buffer[1][j] = insamp[2 * j + 1];
       }
     }
   } else if (glopts.downmix == TRUE) {
@@ -104,7 +104,7 @@ get_audio (FILE * musicin, short buffer[2][1152], unsigned long num_samples,
     for (j = 0; j < 1152; j++) {
       buffer[0][j] = 0.5 * (insamp[2 * j] + insamp[2 * j + 1]);
     }
-  } else {			/* mono */
+  } else {                      /* mono */
     samples_read =
       read_samples (musicin, insamp, num_samples, (unsigned long) 1152);
     for (j = 0; j < 1152; j++) {
@@ -129,7 +129,7 @@ enum byte_order DetermineByteOrder (void)
     long longval;
     char charval[sizeof (long)];
   } probe;
-  probe.longval = 0x41424344L;	/* ABCD in ASCII */
+  probe.longval = 0x41424344L;  /* ABCD in ASCII */
   strncpy (s, probe.charval, sizeof (long));
   s[sizeof (long)] = '\0';
   /* fprintf( stderr, "byte order is %s\n", s ); */
@@ -192,8 +192,8 @@ int aiff_read_headers (FILE * file_ptr, IFF_AIFF * aiff_ptr)
       aiff_ptr->sampleRate = ReadIeeeExtendedHighLow (file_ptr);
       subSize -= 10;
       while (subSize > 0) {
-	getc (file_ptr);
-	subSize -= 1;
+        getc (file_ptr);
+        subSize -= 1;
       }
       break;
 
@@ -205,15 +205,15 @@ int aiff_read_headers (FILE * file_ptr, IFF_AIFF * aiff_ptr)
       subSize -= 4;
       sound_position = ftell (file_ptr) + aiff_ptr->blkAlgn.offset;
       if (fseek (file_ptr, (long) subSize, SEEK_CUR) != 0)
-	return -1;
+        return -1;
       aiff_ptr->sampleType = IFF_ID_SSND;
       break;
 
     default:
       chunkSize -= subSize = Read32BitsHighLow (file_ptr);
       while (subSize > 0) {
-	getc (file_ptr);
-	subSize -= 1;
+        getc (file_ptr);
+        subSize -= 1;
       }
       break;
     }
@@ -241,7 +241,7 @@ int aiff_seek_to_sound_data (FILE * file_ptr)
 *   Determine the type of sound file. (stdin, wav, aiff, raw pcm)
 *   Determine Sampling Frequency
 *             number of samples
-*	      whether the new sample is stereo or mono. 
+*             whether the new sample is stereo or mono. 
 *
 *   If file is coming from /dev/stdin assume it is raw PCM. (it's what I use. YMMV)
 *
@@ -252,13 +252,13 @@ int aiff_seek_to_sound_data (FILE * file_ptr)
 **************************************************************/
 void
 parse_input_file (FILE * musicin, char inPath[MAX_NAME_SIZE], frame_header *header,
-		  unsigned long *num_samples)
+                  unsigned long *num_samples)
 {
 
   IFF_AIFF pcm_aiff_data;
   long soundPosition;
 
-  unsigned char wave_header_buffer[40];	//HH fixed
+  unsigned char wave_header_buffer[40]; //HH fixed
   int wave_header_read = 0;
   int wave_header_stereo = -1;
   int wave_header_16bit = -1;
@@ -271,7 +271,7 @@ parse_input_file (FILE * musicin, char inPath[MAX_NAME_SIZE], frame_header *head
   if ((strcmp (inPath, "/dev/stdin") == 0)) {
     fprintf (stderr, "Reading from stdin\n");
     fprintf (stderr, "Remember to set samplerate with '-s'.\n");
-    *num_samples = MAX_U_32_NUM;	/* huge sound file */
+    *num_samples = MAX_U_32_NUM;        /* huge sound file */
     return;
   }
 
@@ -281,14 +281,14 @@ parse_input_file (FILE * musicin, char inPath[MAX_NAME_SIZE], frame_header *head
     aiff_check (inPath, &pcm_aiff_data, &header->version);
     if (fseek (musicin, soundPosition, SEEK_SET) != 0) {
       fprintf (stderr, "Could not seek to PCM sound data in \"%s\".\n",
-	       inPath);
+               inPath);
       exit (1);
     }
     fprintf (stderr, "Parsing AIFF audio file \n");
     header->sampling_frequency =
       SmpFrqIndex ((long) pcm_aiff_data.sampleRate, &header->version);
     fprintf (stderr, ">>> %f Hz sampling frequency selected\n",
-	     pcm_aiff_data.sampleRate);
+             pcm_aiff_data.sampleRate);
 
     /* Determine number of samples in sound file */
     *num_samples = pcm_aiff_data.numChannels * pcm_aiff_data.numSampleFrames;
@@ -324,16 +324,16 @@ parse_input_file (FILE * musicin, char inPath[MAX_NAME_SIZE], frame_header *head
     if (NativeByteOrder == order_unknown) {
       NativeByteOrder = DetermineByteOrder ();
       if (NativeByteOrder == order_unknown) {
-	fprintf (stderr, "byte order not determined\n");
-	exit (1);
+        fprintf (stderr, "byte order not determined\n");
+        exit (1);
       }
     }
     if (NativeByteOrder == order_littleEndian) {
       samplerate = *(unsigned long *) (&wave_header_buffer[24]);
     } else {
       samplerate = wave_header_buffer[27] +
-	(wave_header_buffer[26] << 8) +
-	(wave_header_buffer[25] << 16) + (wave_header_buffer[24] << 24);
+        (wave_header_buffer[26] << 8) +
+        (wave_header_buffer[25] << 16) + (wave_header_buffer[24] << 24);
     }
     /* Wave File */
     wave_header_read = 1;
@@ -349,13 +349,13 @@ parse_input_file (FILE * musicin, char inPath[MAX_NAME_SIZE], frame_header *head
     default:
       /* Unknown Unsupported Frequency */
       fprintf (stderr, ">>> Unknown samp freq %ld Hz in Wave Header\n",
-	       samplerate);
+               samplerate);
       fprintf (stderr, ">>> Default 44.1 kHz samp freq selected\n");
       samplerate = 44100;
     }
 
     if ((header->sampling_frequency =
-	 SmpFrqIndex ((long) samplerate, &header->version)) < 0) {
+         SmpFrqIndex ((long) samplerate, &header->version)) < 0) {
       fprintf (stderr, "invalid sample rate\n");
       exit (0);
     }
@@ -378,13 +378,13 @@ parse_input_file (FILE * musicin, char inPath[MAX_NAME_SIZE], frame_header *head
     }
     if ((long) wave_header_buffer[32] == 2) {
       if (wave_header_stereo == 1) {
-	fprintf (stderr, ">>> Input Wave File is 8 Bit\n");
-	wave_header_16bit = 0;
-	fprintf (stderr, "Input File must be 16 Bit! Please Re-sample");
-	exit (1);
+        fprintf (stderr, ">>> Input Wave File is 8 Bit\n");
+        wave_header_16bit = 0;
+        fprintf (stderr, "Input File must be 16 Bit! Please Re-sample");
+        exit (1);
       } else {
-	/* fprintf(stderr,  ">>> Input Wave File is 16 Bit\n" ); */
-	wave_header_16bit = 1;
+        /* fprintf(stderr,  ">>> Input Wave File is 16 Bit\n" ); */
+        wave_header_16bit = 1;
       }
     }
     if ((long) wave_header_buffer[32] == 4) {
@@ -393,10 +393,10 @@ parse_input_file (FILE * musicin, char inPath[MAX_NAME_SIZE], frame_header *head
     }
     /* should probably use the wave header to determine size here FIXME MFC Feb 2003 */
     *num_samples = MAX_U_32_NUM;
-    if (fseek (musicin, 44, SEEK_SET) != 0) {	/* there's a way of calculating the size of the
-						   wave header. i'll just jump 44 to start with */
+    if (fseek (musicin, 44, SEEK_SET) != 0) {   /* there's a way of calculating the size of the
+                                                   wave header. i'll just jump 44 to start with */
       fprintf (stderr, "Could not seek to PCM sound data in \"%s\".\n",
-	       inPath);
+               inPath);
       exit (1);
     }
     return;
@@ -436,14 +436,14 @@ void aiff_check (char *file_name, IFF_AIFF * pcm_aiff_data, int *version)
 
   if (pcm_aiff_data->sampleSize != sizeof (short) * BITS_IN_A_BYTE) {
     fprintf (stderr, "Sound data is not %d bits in \"%s\".\n",
-	     sizeof (short) * BITS_IN_A_BYTE, file_name);
+             sizeof (short) * BITS_IN_A_BYTE, file_name);
     exit (1);
   }
 
   if (pcm_aiff_data->numChannels != MONO
       && pcm_aiff_data->numChannels != STEREO) {
     fprintf (stderr, "Sound data is not mono or stereo in \"%s\".\n",
-	     file_name);
+             file_name);
     exit (1);
   }
 
@@ -454,7 +454,7 @@ void aiff_check (char *file_name, IFF_AIFF * pcm_aiff_data, int *version)
 
   if (pcm_aiff_data->blkAlgn.offset != 0) {
     fprintf (stderr, "Block offset is not %d bytes in \"%s\".\n", 0,
-	     file_name);
+             file_name);
     exit (1);
   }
 }
