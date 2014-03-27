@@ -96,8 +96,10 @@ int main (int argc, char **argv)
     SBS *sb_sample;
     typedef double JSBS[3][SCALE_BLOCK][SBLIMIT];
     JSBS *j_sample;
+#ifdef REFERENCECODE
     typedef double IN[2][HAN_SIZE];
     IN *win_que;
+#endif
     typedef unsigned int SUB[2][3][SCALE_BLOCK][SBLIMIT];
     SUB *subband;
 
@@ -128,7 +130,9 @@ int main (int argc, char **argv)
 
     sb_sample = (SBS *) mem_alloc (sizeof (SBS), "sb_sample");
     j_sample = (JSBS *) mem_alloc (sizeof (JSBS), "j_sample");
+#ifdef REFERENCECODE
     win_que = (IN *) mem_alloc (sizeof (IN), "Win_que");
+#endif
     subband = (SUB *) mem_alloc (sizeof (SUB), "subband");
     win_buf = (short **) mem_alloc (sizeof (short *) * 2, "win_buf");
 
