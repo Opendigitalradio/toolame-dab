@@ -12,8 +12,5 @@ int xpad_len(void);
  */
 uint8_t xpad_byte(void);
 
-/* Calculate the two F-PAD bytes */
-uint16_t xpad_fpad(void);
-
 #endif
 

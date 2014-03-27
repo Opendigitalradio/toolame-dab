@@ -393,6 +393,7 @@ int main (int argc, char **argv)
         for (i = 0; i < adb; i++)
             put1bit (&bs, 0);
 
+        uint8_t xpadbyte;
         if (header.dab_extension) {
             if (xpad_len()) {
                 /* Reserve some bytes for X-PAD in DAB mode */
@@ -404,7 +405,8 @@ int main (int argc, char **argv)
                 */
 
                 for (i = 0; i < header.dab_length; i++) {
-                    putbits (&bs, xpad_byte(), 8);
+                    xpadbyte = xpad_byte();
+                    putbits (&bs, xpadbyte, 8);
                 }
             }
             else {
@@ -419,7 +421,10 @@ int main (int argc, char **argv)
                 /* reserved 2 bytes for F-PAD in DAB mode  */
                 putbits (&bs, crc, 8);
             }
-            putbits (&bs, xpad_fpad(), 16);	// CI
+            xpadbyte = xpad_byte();
+            putbits (&bs, xpadbyte, 8);
+            xpadbyte = xpad_byte();
+            putbits (&bs, xpadbyte, 8);
 
             //header.dab_length = xpad_len();	// set xpad-length for next frame
 
@@ -573,7 +578,7 @@ void usage (void)
     fprintf (stdout, "\t-o       mark as original\n");
     fprintf (stdout, "\t-e       add error protection\n");
     fprintf (stdout, "\t-r       force padding bit/frame off\n");
-    fprintf (stdout, "\t-D portnum  activate DAB-mode. Listen for pad data on port portnum\n");
+    fprintf (stdout, "\t-D xpadlen  activate DAB-mode. Read xpadlen bytes per frame from the pad file (hardcoded in xpad.c)\n");
     fprintf (stdout, "\t-t       talkativity 0=no messages (dflt 2)");
     fprintf (stdout, "Files\n");
     fprintf (stdout,
@@ -793,8 +798,8 @@ void parse_args (int argc, char **argv, frame_info * frame, int *psy,
                         break;
                     case 'D':
                         argUsed = 1;
-                        header->dab_length = atoi(arg);
-                        //header->dab_length = xpad_len();
+                        const int fpad_len = 2;
+                        header->dab_length = atoi(arg) - fpad_len;
                         header->error_protection = TRUE;
                         header->dab_extension = 2;
                         header->padding = 0;

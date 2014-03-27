@@ -11,15 +11,16 @@
 
 static int xpad_fd = 0;
 
-uint16_t xpad_fpad() {
+/* The F-PAD has to be:
     uint16_t fpad = 0x2; // CI flag
 
     if (xpad_len()) {
         fpad |= 1<<13; // variable length X-PAD
     }
 
-    return fpad;
-}
+   which is included by mot-encoder in the file/fifo
+   it generates
+   */
 
 int xpad_len() {
     if (xpad_fd == 0) {
