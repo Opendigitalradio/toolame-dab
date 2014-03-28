@@ -29,6 +29,8 @@ Bit_stream_struc bs;
 char *programName;
 char toolameversion[] = "0.2l-opendigitalradio";
 
+const int FPAD_LENGTH=2;
+
 void global_init (void)
 {
     glopts.usepsy = TRUE;
@@ -122,6 +124,8 @@ int main (int argc, char **argv)
     int lg_frame;
     int i;
 
+    char* mot_file = NULL;
+
     /* Used to keep the SNR values for the fast/quick psy models */
     static FLOAT smrdef[2][32];
 
@@ -161,8 +165,29 @@ int main (int argc, char **argv)
         short_usage ();
     else
         parse_args (argc, argv, &frame, &model, &num_samples, original_file_name,
-                encoded_file_name);
+                encoded_file_name, &mot_file);
     print_config (&frame, &model, original_file_name, encoded_file_name);
+
+    uint8_t* xpad_data = NULL;
+    if (mot_file != NULL) {
+        if (header.dab_length <= 0 ||
+                header.dab_length > 58) {
+            fprintf(stderr, "Invalid XPAD length specified\n");
+            return 1;
+        }
+
+        int err = xpad_init(mot_file, header.dab_length);
+        if (err == -1) {
+            fprintf(stderr, "XPAD reader initialisation failed\n");
+            return 1;
+        }
+
+        xpad_data = malloc(header.dab_length);
+    }
+    int xpad_len = xpad_read_len(xpad_data, header.dab_length);
+    if (xpad_len == -1) {
+        return 1;
+    }
 
     /* this will load the alloc tables and do some other stuff */
     hdr_to_frps (&frame);
@@ -171,8 +196,19 @@ int main (int argc, char **argv)
 
     while (get_audio (musicin, buffer, num_samples, nch, &header) > 0) {
         if (glopts.verbosity > 1)
-            if (++frameNum % 10 == 0)
-                fprintf (stderr, "[%4u]\r", frameNum);
+            if (++frameNum % 10 == 0) {
+                if (mot_file) {
+                    fprintf (stderr, "[%4u %s ]\r",
+                        frameNum,
+                        xpad_len > 0 ? "p" : " "
+                        );
+                }
+                else {
+                    fprintf (stderr, "[%4u]\r",
+                        frameNum);
+                }
+            }
+
         fflush (stderr);
         win_buf[0] = &buffer[0][0];
         win_buf[1] = &buffer[1][0];
@@ -397,24 +433,24 @@ int main (int argc, char **argv)
         for (i = 0; i < adb; i++)
             put1bit (&bs, 0);
 
-        uint8_t xpadbyte;
         if (header.dab_extension) {
-            if (xpad_len()) {
+            if (xpad_len) {
                 /* Reserve some bytes for X-PAD in DAB mode */
 
-                /* always fill it entirely
-                for (i=header.dab_length-xpad_len(); i>0; i--) {
+                assert(xpad_len > 2);
+
+                for (i=header.dab_length-xpad_len+FPAD_LENGTH; i>0; i--) {
                     putbits(&bs, 0, 8);
                 }
-                */
 
-                for (i = 0; i < header.dab_length; i++) {
-                    xpadbyte = xpad_byte();
-                    putbits (&bs, xpadbyte, 8);
+                for (i = 0; i < xpad_len-FPAD_LENGTH; i++) {
+                    putbits (&bs, xpad_data[i], 8);
                 }
             }
             else {
-                fprintf(stderr, "error getting xpad!\n");
+                for (i=header.dab_length; i>0; i--) {
+                    putbits(&bs, 0, 8);
+                }
             }
 
             for (i = header.dab_extension - 1; i >= 0; i--) {
@@ -425,13 +461,35 @@ int main (int argc, char **argv)
                 /* reserved 2 bytes for F-PAD in DAB mode  */
                 putbits (&bs, crc, 8);
             }
-            xpadbyte = xpad_byte();
-            putbits (&bs, xpadbyte, 8);
-            xpadbyte = xpad_byte();
-            putbits (&bs, xpadbyte, 8);
 
-            //header.dab_length = xpad_len();	// set xpad-length for next frame
+            if (xpad_len) {
+                /* The F-PAD is also given us by mot-encoder */
+                putbits (&bs, xpad_data[xpad_len-2], 8);
+                putbits (&bs, xpad_data[xpad_len-1], 8);
+            }
+            else {
+                putbits (&bs, 0, 16); // FPAD is all-zero
+            }
 
+            /* Check if we have new PAD data for the next frame
+             */
+            if (mot_file) {
+                /* set xpad-length for next frame */
+                int new_xpad_len = xpad_read_len(xpad_data, header.dab_length);
+
+                if (new_xpad_len == -1) {
+                    fprintf(stderr, "Error reading XPAD data\n");
+                    xpad_len = 0;
+                }
+                else if (new_xpad_len == 0 ||
+                         new_xpad_len == header.dab_length) {
+                    xpad_len = new_xpad_len;
+                }
+                else {
+                    fprintf(stderr, "new xpad length=%d\n", new_xpad_len);
+                    abort();
+                }
+            }
         }
 
         frameBits = sstell (&bs) - sentBits;
@@ -653,7 +711,7 @@ void short_usage (void)
 
 void parse_args (int argc, char **argv, frame_info * frame, int *psy,
         unsigned long *num_samples, char inPath[MAX_NAME_SIZE],
-        char outPath[MAX_NAME_SIZE])
+        char outPath[MAX_NAME_SIZE], char **mot_file)
 {
     FLOAT srate;
     int brate;
@@ -794,11 +852,11 @@ void parse_args (int argc, char **argv, frame_info * frame, int *psy,
                         break;
                     case 'P':
                         argUsed = 1;
+                        *mot_file = arg;
                         break;
                     case 'p':
                         argUsed = 1;
-                        const int fpad_len = 2;
-                        header->dab_length = atoi(arg) - fpad_len;
+                        header->dab_length = atoi(arg);
                         break;
                     case 'c':
                         header->copyright = 1;
@@ -808,12 +866,6 @@ void parse_args (int argc, char **argv, frame_info * frame, int *psy,
                         break;
                     case 'e':
                         header->error_protection = TRUE;
-                        break;
-                    case 'f':
-                        *psy = 0;
-                        /* this switch is deprecated? FIXME get rid of glopts.usepsy
-                           instead us psymodel 0, i.e. "-y 0" */
-                        glopts.usepsy = FALSE;
                         break;
                     case 'r':
                         glopts.usepadbit = FALSE;

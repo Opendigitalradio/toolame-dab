@@ -3,14 +3,26 @@
 
 #include <stdint.h>
 
-/* Return the number of bytes of x-pad data
- * we have ready
+/* Initialise the xpad reader
+ *
+ * pad_fifo is the filename of the FIFO that will be created, and
+ * can be used with mot-encoder.
+ *
+ * pad_len is the XPAD length, that also has to be given
+ * to mot-encoder.
+ *
+ * returns 0  on success
+ *         -1 on failure
  */
-int xpad_len(void);
+int xpad_init(char* pad_fifo, int pad_len);
 
-/* Get one x-pad byte
+/* Get len bytes of x-pad data, write into buf
+ * returns either
+ * - len if the read was sucessful
+ * - 0   if there was no data
+ * - -1  if there was an error (errno will be set)
  */
-uint8_t xpad_byte(void);
+int xpad_read_len(uint8_t* buf, int len);
 
 #endif
 

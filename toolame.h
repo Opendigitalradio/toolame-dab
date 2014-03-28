@@ -6,7 +6,7 @@ void short_usage (void);
 void obtain_parameters (frame_info *, int *, unsigned long *,
 			       char[MAX_NAME_SIZE], char[MAX_NAME_SIZE]);
 void parse_args (int, char **, frame_info *, int *, unsigned long *,
-			char[MAX_NAME_SIZE], char[MAX_NAME_SIZE]);
+			char[MAX_NAME_SIZE], char[MAX_NAME_SIZE], char**);
 void print_config (frame_info *, int *,
 			  char[MAX_NAME_SIZE], char[MAX_NAME_SIZE]);
 void usage (void);
