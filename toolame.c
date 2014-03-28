@@ -27,7 +27,7 @@
 FILE *musicin;
 Bit_stream_struc bs;
 char *programName;
-char toolameversion[10] = "0.2l-pad";
+char toolameversion[] = "0.2l-opendigitalradio";
 
 void global_init (void)
 {
@@ -549,9 +549,9 @@ void usage (void)
 {				/* print syntax & exit */
     /* FIXME: maybe have an option to display better definitions of help codes, and
        long equivalents of the flags */
-    fprintf (stdout, "\ntooLAME version %s (http://toolame.sourceforge.net)\n",
+    fprintf (stdout, "\ntooLAME version %s (http://opendigitalradio.org)\n",
             toolameversion);
-    fprintf (stdout, "MPEG Audio Layer II encoder\n\n");
+    fprintf (stdout, "MPEG Audio Layer II encoder for DAB\n\n");
     fprintf (stdout, "usage: \n");
     fprintf (stdout, "\t%s [options] <input> <output>\n\n", programName);
 
@@ -565,14 +565,14 @@ void usage (void)
     fprintf (stdout, "Output\n");
     fprintf (stdout, "\t-m mode  channel mode : s/d/j/m   (dflt %4c)\n",
             DFLT_MOD);
-    fprintf (stdout, "\t-p psy   psychoacoustic model 0/1/2/3 (dflt %4u)\n",
+    fprintf (stdout, "\t-y psy   psychoacoustic model 0/1/2/3 (dflt %4u)\n",
             DFLT_PSY);
     fprintf (stdout, "\t-b br    total bitrate in kbps    (dflt 192)\n");
     fprintf (stdout, "\t-v lev   vbr mode\n");
     fprintf (stdout, "\t-l lev   ATH level (dflt 0)\n");
     fprintf (stdout, "Operation\n");
     // fprintf (stdout, "\t-f       fast mode (turns off psy model)\n");
-    // deprecate the -f switch. use "-p 0" instead.
+    // deprecate the -f switch. use "-y 0" instead.
     fprintf (stdout,
             "\t-q num   quick mode. only calculate psy model every num frames\n");
     fprintf (stdout, "Misc\n");
@@ -582,7 +582,10 @@ void usage (void)
     fprintf (stdout, "\t-o       mark as original\n");
     fprintf (stdout, "\t-e       add error protection\n");
     fprintf (stdout, "\t-r       force padding bit/frame off\n");
-    fprintf (stdout, "\t-D xpadlen  activate DAB-mode. Read xpadlen bytes per frame from the pad file (hardcoded in xpad.c)\n");
+    fprintf (stdout, "\t-p len   "
+            "enable PAD, and read len bytes of X-PAD data per frame\n");
+    fprintf (stdout, "\t-P file  "
+            "read X-PAD data from mot-encoder from the specified file\n");
     fprintf (stdout, "\t-t       talkativity 0=no messages (dflt 2)");
     fprintf (stdout, "Files\n");
     fprintf (stdout,
@@ -606,23 +609,12 @@ void usage (void)
 void short_usage (void)
 {
     /* print a bit of info about the program */
-    fprintf (stderr, "tooLAME version %s\n (http://toolame.sourceforge.net)\n",
+    fprintf (stderr, "tooLAME version %s\n (http://opendigitalradio.org)\n",
             toolameversion);
-    fprintf (stderr, "MPEG Audio Layer II encoder\n\n");
+    fprintf (stderr, "MPEG Audio Layer II encoder for DAB\n\n");
     fprintf (stderr, "USAGE: %s [options] <infile> [outfile]\n\n", programName);
     fprintf (stderr, "Try \"%s -h\" for more information.\n", programName);
     exit (0);
-}
-
-/*********************************************
- * void proginfo(void)
- ********************************************/
-void proginfo (void)
-{
-    /* print a bit of info about the program */
-    fprintf (stderr,
-            "\ntooLAME version 0.2g (http://toolame.sourceforge.net)\n");
-    fprintf (stderr, "MPEG Audio Layer II encoder\n\n");
 }
 
 /************************************************************************
@@ -637,7 +629,7 @@ void proginfo (void)
  * syntax:
  *
  * -m  is followed by the mode
- * -p  is followed by the psychoacoustic model number
+ * -y  is followed by the psychoacoustic model number
  * -s  is followed by the sampling rate
  * -b  is followed by the total bitrate, irrespective of the mode
  * -d  is followed by the emphasis flag
@@ -767,7 +759,7 @@ void parse_args (int argc, char **argv, frame_info * frame, int *psy,
                             err = 1;
                         }
                         break;
-                    case 'p':
+                    case 'y':
                         *psy = atoi (arg);
                         argUsed = 1;
                         break;
@@ -800,14 +792,13 @@ void parse_args (int argc, char **argv, frame_info * frame, int *psy,
                             err = 1;
                         }
                         break;
-                    case 'D':
+                    case 'P':
+                        argUsed = 1;
+                        break;
+                    case 'p':
                         argUsed = 1;
                         const int fpad_len = 2;
                         header->dab_length = atoi(arg) - fpad_len;
-                        header->error_protection = TRUE;
-                        header->dab_extension = 2;
-                        header->padding = 0;
-                        glopts.dab = TRUE;
                         break;
                     case 'c':
                         header->copyright = 1;
@@ -821,7 +812,7 @@ void parse_args (int argc, char **argv, frame_info * frame, int *psy,
                     case 'f':
                         *psy = 0;
                         /* this switch is deprecated? FIXME get rid of glopts.usepsy
-                           instead us psymodel 0, i.e. "-p 0" */
+                           instead us psymodel 0, i.e. "-y 0" */
                         glopts.usepsy = FALSE;
                         break;
                     case 'r':
@@ -898,6 +889,12 @@ void parse_args (int argc, char **argv, frame_info * frame, int *psy,
             }
         }
     }
+
+    /* Always enable DAB mode */
+    header->error_protection = TRUE;
+    header->dab_extension = 2;
+    header->padding = 0;
+    glopts.dab = TRUE;
 
     if (header->dab_extension) {
         /* in 48 kHz */
