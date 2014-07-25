@@ -644,7 +644,7 @@ void usage (void)
             "enable PAD, and read len bytes of X-PAD data per frame\n");
     fprintf (stdout, "\t-P file  "
             "read X-PAD data from mot-encoder from the specified file\n");
-    fprintf (stdout, "\t-t       talkativity 0=no messages (dflt 2)");
+    fprintf (stdout, "\t-t       talkativity 0=no messages (dflt 2)\n");
     fprintf (stdout, "Files\n");
     fprintf (stdout,
             "\tinput    input sound file. (WAV,AIFF,PCM or use '/dev/stdin')\n");
