@@ -28,6 +28,10 @@ typedef struct IFF_AIFF_struct
 }
 IFF_AIFF;
 
+void setup_jack(frame_header *header, const char* jackname);
+int process(jack_nframes_t nframes, void *arg);
+void jack_shutdown(void *arg);
+
 void parse_input_file (FILE *musicin, char *, frame_header *header, unsigned long *num_samples);
 void aiff_check (char *file_name, IFF_AIFF * pcm_aiff_data, int *version);
 
@@ -35,7 +39,8 @@ int aiff_read_headers (FILE *, IFF_AIFF *);
 int aiff_seek_to_sound_data (FILE *);
 enum byte_order DetermineByteOrder (void);
 void SwapBytesInWords (short *loc, int words);
- unsigned long read_samples (FILE *, short[2304], unsigned long,
+ unsigned long read_samples (music_in_t*, short[2304], unsigned long,
 				   unsigned long);
- unsigned long get_audio (FILE *, short[2][1152], unsigned long,
+ unsigned long get_audio (music_in_t*, short[2][1152], unsigned long,
 				int, frame_header *header);
+

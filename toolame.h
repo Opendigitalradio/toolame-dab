@@ -12,5 +12,5 @@ void print_config (frame_info *, int *,
 void usage (void);
 
 
-
 void smr_dump(double smr[2][SBLIMIT], int nch);
+

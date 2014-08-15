@@ -89,6 +89,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <jack/jack.h>
 
 /* Structure for Reading Layer II Allocation Tables from File */
 
@@ -161,6 +162,17 @@ Bit_stream_struc;
 enum byte_order
 { order_unknown, order_bigEndian, order_littleEndian };
 extern enum byte_order NativeByteOrder;
+
+
+typedef struct music_in_s
+{
+    /* Data for the wav input */
+    FILE* wav_input;
+
+    /* Data for the jack input */
+    jack_client_t* jack_client;
+    const char*    jack_name;
+} music_in_t;
 
 /* "bit_stream.h" Type Definitions */
 

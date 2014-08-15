@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <pthread.h>
+#include <jack/jack.h>
+#include <jack/ringbuffer.h>
 #include "common.h"
 #include "encoder.h"
 #include "musicin.h"
@@ -24,7 +27,7 @@
 
 #include <assert.h>
 
-FILE *musicin;
+music_in_t musicin;
 Bit_stream_struc bs;
 char *programName;
 char toolameversion[] = "0.2l-opendigitalradio";
@@ -44,6 +47,7 @@ void global_init (void)
     glopts.vbrlevel = 0;
     glopts.athlevel = 0;
     glopts.verbosity = 2;
+    glopts.enable_jack = 0;
 }
 
 /************************************************************************
@@ -194,7 +198,7 @@ int main (int argc, char **argv)
     nch = frame.nch;
     error_protection = header.error_protection;
 
-    while (get_audio (musicin, buffer, num_samples, nch, &header) > 0) {
+    while (get_audio (&musicin, buffer, num_samples, nch, &header) > 0) {
         if (glopts.verbosity > 1)
             if (++frameNum % 10 == 0) {
                 if (mot_file) {
@@ -535,9 +539,11 @@ int main (int argc, char **argv)
             (FLOAT) sentBits / (frameNum * 1152) *
             s_freq[header.version][header.sampling_frequency]);
 
-    if (fclose (musicin) != 0) {
-        fprintf (stderr, "Could not close \"%s\".\n", original_file_name);
-        exit (2);
+    if (!glopts.enable_jack) {
+        if ( fclose (musicin.wav_input) != 0) {
+            fprintf (stderr, "Could not close \"%s\".\n", original_file_name);
+            exit (2);
+        }
     }
 
     fprintf (stderr, "\nDone\n");
@@ -561,9 +567,16 @@ void print_config (frame_info * frame, int *psy, char *inPath,
         return;
 
     fprintf (stderr, "--------------------------------------------\n");
-    fprintf (stderr, "Input File : '%s'   %.1f kHz\n",
-            (strcmp (inPath, "-") ? inPath : "stdin"),
-            s_freq[header->version][header->sampling_frequency]);
+    if (glopts.enable_jack) {
+        fprintf (stderr, "Input JACK\n");
+        fprintf (stderr, "      name %s\n", musicin.jack_name);
+    }
+    else {
+        fprintf (stderr, "Input File : '%s'   %.1f kHz\n",
+                (strcmp (inPath, "-") ? inPath : "stdin"),
+                s_freq[header->version][header->sampling_frequency]);
+    }
+
     fprintf (stderr, "Output File: '%s'\n",
             (strcmp (outPath, "-") ? outPath : "stdout"));
     fprintf (stderr, "%d kbps ", bitrate[header->version][header->bitrate_index]);
@@ -620,6 +633,7 @@ void usage (void)
     fprintf (stdout, "\t-a       downmix from stereo to mono\n");
     fprintf (stdout, "\t-x       force byte-swapping of input\n");
     fprintf (stdout, "\t-g       swap channels of input file\n");
+    fprintf (stdout, "\t-j       enable jack input\n");
     fprintf (stdout, "Output\n");
     fprintf (stdout, "\t-m mode  channel mode : s/d/j/m   (dflt %4c)\n",
             DFLT_MOD);
@@ -670,7 +684,7 @@ void short_usage (void)
     fprintf (stderr, "tooLAME version %s\n (http://opendigitalradio.org)\n",
             toolameversion);
     fprintf (stderr, "MPEG Audio Layer II encoder for DAB\n\n");
-    fprintf (stderr, "USAGE: %s [options] <infile> [outfile]\n\n", programName);
+    fprintf (stderr, "USAGE: %s [options] (<infile>|<jackname>) [outfile]\n\n", programName);
     fprintf (stderr, "Try \"%s -h\" for more information.\n", programName);
     exit (0);
 }
@@ -686,6 +700,7 @@ void short_usage (void)
  * SEMANTICS:  The command line is parsed according to the following
  * syntax:
  *
+ * -j  turns on JACK input
  * -m  is followed by the mode
  * -y  is followed by the psychoacoustic model number
  * -s  is followed by the sampling rate
@@ -832,6 +847,10 @@ void parse_args (int argc, char **argv, frame_info * frame, int *psy,
                             err = 1;
                         break;
 
+                    case 'j':
+                        glopts.enable_jack = 1;
+                        break;
+
                     case 'b':
                         argUsed = 1;
                         brate = atoi (arg);
@@ -958,23 +977,34 @@ void parse_args (int argc, char **argv, frame_info * frame, int *psy,
     }
 
 
-    if (err || inPath[0] == '\0')
-        usage ();			/* If no infile defined, or err has occured, then call usage() */
+    if (err)
+        usage ();			/* If err has occured, then call usage() */
+
+    if (!glopts.enable_jack && inPath[0] == '\0')
+        usage ();			/* If not in jack-mode and no file specified, then call usage() */
 
     if (outPath[0] == '\0') {
         /* replace old extension with new one, 1992-08-19, 1995-06-12 shn */
         new_ext (inPath, DFLT_EXT, outPath);
     }
 
-    if (!strcmp (inPath, "-")) {
-        musicin = stdin;		/* read from stdin */
+    if (glopts.enable_jack) {
+        musicin.jack_name = inPath;
         *num_samples = MAX_U_32_NUM;
-    } else {
-        if ((musicin = fopen (inPath, "rb")) == NULL) {
-            fprintf (stderr, "Could not find \"%s\".\n", inPath);
-            exit (1);
+
+        setup_jack(header, musicin.jack_name);
+    }
+    else {
+        if (!strcmp (inPath, "-")) {
+            musicin.wav_input = stdin;		/* read from stdin */
+            *num_samples = MAX_U_32_NUM;
+        } else {
+            if ((musicin.wav_input = fopen (inPath, "rb")) == NULL) {
+                fprintf (stderr, "Could not find \"%s\".\n", inPath);
+                exit (1);
+            }
+            parse_input_file (musicin.wav_input, inPath, header, num_samples);
         }
-        parse_input_file (musicin, inPath, header, num_samples);
     }
 
     /* check for a valid bitrate */

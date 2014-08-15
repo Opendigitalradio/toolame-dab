@@ -96,7 +96,7 @@ CC_SWITCHES = $(OPTIM) $(REQUIRED) $(ARCH) $(PG) $(TWEAKS) $(WARNINGS) $(NEW_02L
 
 PGM = toolame
 
-LIBS =  -lm -lzmq
+LIBS =  -lm -lzmq -ljack -lpthread
 
 #nick burch's OS/2 fix  gagravarr@SoftHome.net
 UNAME = $(shell uname)
