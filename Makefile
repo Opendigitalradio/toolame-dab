@@ -1,6 +1,40 @@
 
 CC = gcc
 
+HEADERS = \
+	absthr.h \
+	ath.h \
+	audio_read.h \
+	availbits.h \
+	bitstream.h \
+	common.h \
+	crc.h \
+	critband.h \
+	encode.h \
+	encode_new.h \
+	encoder.h \
+	enwindow.h \
+	fft.h \
+	freqtable.h \
+	ieeefloat.h \
+	mem.h \
+	musicin.h \
+	options.h \
+	portableio.h \
+	psycho_0.h \
+	psycho_1.h \
+	psycho_1_priv.h \
+	psycho_2.h \
+	psycho_3.h \
+	psycho_3priv.h \
+	psycho_4.h \
+	psycho_n1.h \
+	subband.h \
+	tables.h \
+	toolame.h \
+	xpad.h \
+	zmqoutput.h
+
 c_sources = \
 	common.c \
 	encode.c \
@@ -73,14 +107,14 @@ ifeq ($(UNAME),OS/2)
    LIBS =
 endif
 
-%.o: %.c Makefile
+%.o: %.c $(HEADERS) Makefile
 	$(CC) $(CC_SWITCHES) -c $< -o $@
 
-$(PGM):	$(OBJ) Makefile
+$(PGM):	$(OBJ) $(HEADERS) Makefile
 	$(CC) $(PG) -o $(PGM) $(OBJ) $(LIBS)
 
 clean:
-	-rm $(OBJ) $(DEP)
+	-rm $(OBJ) $(DEP) $(PGM)
 
 megaclean:
 	-rm $(OBJ) $(DEP) $(PGM) \#*\# *~
