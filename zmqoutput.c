@@ -1,6 +1,7 @@
 #include "zmqoutput.h"
 #include <zmq.h>
 #include <stdlib.h>
+#include <string.h>
 #include "common.h"
 
 static void *zmq_context;
@@ -43,7 +44,22 @@ int zmqoutput_write_byte(Bit_stream_struc *bs, unsigned char data)
 
     if (zmqbuf_len == bs->zmq_framesize) {
 
-        int send_error = zmq_send(bs->zmq_sock, zmqbuf, bs->zmq_framesize,
+        int frame_length = sizeof(struct zmq_frame_header) + zmqbuf_len;
+
+        struct zmq_frame_header* header =
+            malloc(frame_length);
+
+        uint8_t* txframe = ((uint8_t*)header) + sizeof(struct zmq_frame_header);
+
+        header->version          = 1;
+        header->encoder          = ZMQ_ENCODER_TOOLAME;
+        header->datasize         = zmqbuf_len;
+        header->audiolevel_left  = 0;
+        header->audiolevel_right = 0;
+
+        memcpy(txframe, zmqbuf, zmqbuf_len);
+
+        int send_error = zmq_send(bs->zmq_sock, txframe, frame_length,
                 ZMQ_DONTWAIT);
 
         if (send_error < 0) {
