@@ -87,10 +87,10 @@ void setup_jack(frame_header *header, const char* jackname) {
 
     /* create two ports */
 
-    input_port_left = jack_port_register(client, "in_left",
+    input_port_left = jack_port_register(client, "input0",
             JACK_DEFAULT_AUDIO_TYPE,
             JackPortIsInput, 0);
-    input_port_right = jack_port_register(client, "in_right",
+    input_port_right = jack_port_register(client, "input1",
             JACK_DEFAULT_AUDIO_TYPE,
             JackPortIsInput, 0);
 
