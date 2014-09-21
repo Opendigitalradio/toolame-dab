@@ -502,9 +502,8 @@ int main (int argc, char **argv)
             fprintf (stderr, "Sent %ld bits = %ld slots plus %ld\n", frameBits,
                     frameBits / 8, frameBits % 8);
             fprintf (stderr, "If you are reading this, the program is broken\n");
-            fprintf (stderr, "email [mfc at NOTplanckenerg.com] without the NOT\n");
-            fprintf (stderr, "with the command line arguments and other info\n");
-            exit (0);
+            fprintf (stderr, "Please report a bug.\n");
+            exit(1);
         }
 
         sentBits += frameBits;
