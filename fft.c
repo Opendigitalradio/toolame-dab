@@ -1191,8 +1191,16 @@ static void fht (FLOAT * fz)
 
 INLINE FLOAT atan_table(FLOAT y, FLOAT x) {
   int index;
+  double index_d = ATANSCALE * fabs(y/x);
 
-  index = (int)(ATANSCALE * fabs(y/x));
+  // Don't cast an infinite to an int, that's undefined behaviour
+  if (isfinite(index_d)) {
+      index = (int)(ATANSCALE * fabs(y/x));
+  }
+  else {
+      index = ATANSIZE-1;
+  }
+
   if (index>=ATANSIZE)
     index = ATANSIZE-1;
 
