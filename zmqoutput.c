@@ -13,6 +13,14 @@ unsigned char* zmqbuf;
 // buffer size)
 size_t zmqbuf_len;
 
+static int zmq_peak_left = 0;
+static int zmq_peak_right = 0;
+
+void zmqoutput_set_peaks(int left, int right)
+{
+    zmq_peak_left = left;
+    zmq_peak_right = right;
+}
 
 int zmqoutput_open(Bit_stream_struc *bs, char* uri)
 {

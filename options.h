@@ -17,6 +17,7 @@ typedef struct
 				          used for VBR in LAME */
   int verbosity;                /* 2 by default. 0 is no output at all */
   int enable_jack; /* 1=use JACK input, 2=use wav input */
+  int show_level; /* 1=show the sox-like audio level measurement */
 }
 options;
 

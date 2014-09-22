@@ -24,6 +24,7 @@
 #include "encode_new.h"
 #include "toolame.h"
 #include "xpad.h"
+#include "utils.h"
 
 #include <assert.h>
 
@@ -128,6 +129,10 @@ int main (int argc, char **argv)
     int lg_frame;
     int i;
 
+    /* Keep track of peaks */
+    int peak_left = 0;
+    int peak_right = 0;
+
     char* mot_file = NULL;
 
     /* Used to keep the SNR values for the fast/quick psy models */
@@ -198,22 +203,44 @@ int main (int argc, char **argv)
     nch = frame.nch;
     error_protection = header.error_protection;
 
-    while (get_audio (&musicin, buffer, num_samples, nch, &header) > 0) {
+    unsigned long samps_read;
+    while ((samps_read = get_audio(&musicin, buffer, num_samples, nch, &header)) > 0) {
+        unsigned long j;
+        for (j = 0; j < samps_read; j++) {
+            peak_left  = MAX(peak_left,  buffer[0][j]);
+        }
+        for (j = 0; j < samps_read; j++) {
+            peak_right = MAX(peak_right, buffer[1][j]);
+        }
+
+        // We can always set the zmq peaks, even if the output is not
+        // used, it just writes some variables
+        zmqoutput_set_peaks(peak_left, peak_right);
+
         if (glopts.verbosity > 1)
             if (++frameNum % 10 == 0) {
+
+                fprintf(stderr, "[%4u", frameNum);
+
                 if (mot_file) {
-                    fprintf (stderr, "[%4u %s ]\r",
-                        frameNum,
-                        xpad_len > 0 ? "p" : " "
-                        );
+                    fprintf(stderr, " %s",
+                        xpad_len > 0 ? "p" : " ");
+                }
+
+                if (glopts.show_level) {
+                    fprintf(stderr, " (%6d|%-6d) ",
+                            peak_left, peak_right);
+
+                    fprintf(stderr, "] [%6s|%-6s]\r",
+                            level(0, &peak_left),
+                            level(1, &peak_right) );
                 }
                 else {
-                    fprintf (stderr, "[%4u]\r",
-                        frameNum);
+                    fprintf(stderr, "]\r");
                 }
             }
 
-        fflush (stderr);
+        fflush(stderr);
         win_buf[0] = &buffer[0][0];
         win_buf[1] = &buffer[1][0];
 
@@ -633,6 +660,7 @@ void usage (void)
     fprintf (stdout, "\t-x       force byte-swapping of input\n");
     fprintf (stdout, "\t-g       swap channels of input file\n");
     fprintf (stdout, "\t-j       enable jack input\n");
+    fprintf (stdout, "\t-L       enable audio level display\n");
     fprintf (stdout, "Output\n");
     fprintf (stdout, "\t-m mode  channel mode : s/d/j/m   (dflt %4c)\n",
             DFLT_MOD);
@@ -700,6 +728,7 @@ void short_usage (void)
  * syntax:
  *
  * -j  turns on JACK input
+ * -L  turns on audio level display
  * -m  is followed by the mode
  * -y  is followed by the psychoacoustic model number
  * -s  is followed by the sampling rate
@@ -834,6 +863,10 @@ void parse_args (int argc, char **argv, frame_info * frame, int *psy,
                     case 'y':
                         *psy = atoi (arg);
                         argUsed = 1;
+                        break;
+
+                    case 'L':
+                        glopts.show_level = 1;
                         break;
 
                     case 's':

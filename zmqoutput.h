@@ -28,5 +28,7 @@ int zmqoutput_write_byte(Bit_stream_struc *bs, unsigned char data);
 
 void zmqoutput_close(Bit_stream_struc *bs);
 
+void zmqoutput_set_peaks(int left, int right);
+
 #endif
 

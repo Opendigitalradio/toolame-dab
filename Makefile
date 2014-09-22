@@ -32,6 +32,7 @@ HEADERS = \
 	subband.h \
 	tables.h \
 	toolame.h \
+	utils.h \
 	xpad.h \
 	zmqoutput.h
 
@@ -58,6 +59,7 @@ c_sources = \
 	ath.c \
 	encode_new.c \
 	zmqoutput.c \
+	utils.c \
 	xpad.c
 
 OBJ = $(c_sources:.c=.o)
