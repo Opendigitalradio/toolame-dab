@@ -67,7 +67,7 @@ int zmqoutput_write_byte(Bit_stream_struc *bs, unsigned char data)
 
         memcpy(txframe, zmqbuf, zmqbuf_len);
 
-        int send_error = zmq_send(bs->zmq_sock, txframe, frame_length,
+        int send_error = zmq_send(bs->zmq_sock, header, frame_length,
                 ZMQ_DONTWAIT);
 
         if (send_error < 0) {
