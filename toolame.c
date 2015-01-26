@@ -534,6 +534,10 @@ int main (int argc, char **argv)
         }
 
         sentBits += frameBits;
+
+        // Reset peak measurement
+        peak_left = 0;
+        peak_right = 0;
     }
 
     close_bit_stream_w (&bs);

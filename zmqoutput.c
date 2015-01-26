@@ -62,8 +62,8 @@ int zmqoutput_write_byte(Bit_stream_struc *bs, unsigned char data)
         header->version          = 1;
         header->encoder          = ZMQ_ENCODER_TOOLAME;
         header->datasize         = zmqbuf_len;
-        header->audiolevel_left  = 0;
-        header->audiolevel_right = 0;
+        header->audiolevel_left  = zmq_peak_left;
+        header->audiolevel_right = zmq_peak_right;
 
         memcpy(txframe, zmqbuf, zmqbuf_len);
 
