@@ -34,7 +34,8 @@ HEADERS = \
 	toolame.h \
 	utils.h \
 	xpad.h \
-	zmqoutput.h
+	zmqoutput.h \
+	vlc_input.h
 
 c_sources = \
 	common.c \
@@ -60,7 +61,8 @@ c_sources = \
 	encode_new.c \
 	zmqoutput.c \
 	utils.c \
-	xpad.c
+	xpad.c \
+	vlc_input.c
 
 OBJ = $(c_sources:.c=.o)
 
@@ -98,7 +100,7 @@ CC_SWITCHES = $(OPTIM) $(REQUIRED) $(ARCH) $(PG) $(TWEAKS) $(WARNINGS) $(NEW_02L
 
 PGM = toolame
 
-LIBS =  -lm -lzmq -ljack -lpthread
+LIBS =  -lm -lzmq -ljack -lpthread -lvlc
 
 #nick burch's OS/2 fix  gagravarr@SoftHome.net
 UNAME = $(shell uname)

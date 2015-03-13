@@ -25,6 +25,7 @@
 #include "toolame.h"
 #include "xpad.h"
 #include "utils.h"
+#include "vlc_input.h"
 
 #include <assert.h>
 
@@ -48,7 +49,7 @@ void global_init (void)
     glopts.vbrlevel = 0;
     glopts.athlevel = 0;
     glopts.verbosity = 2;
-    glopts.enable_jack = 0;
+    glopts.input_select = 0;
 }
 
 /************************************************************************
@@ -569,7 +570,7 @@ int main (int argc, char **argv)
             (FLOAT) sentBits / (frameNum * 1152) *
             s_freq[header.version][header.sampling_frequency]);
 
-    if (!glopts.enable_jack) {
+    if (glopts.input_select == INPUT_SELECT_WAV) {
         if ( fclose (musicin.wav_input) != 0) {
             fprintf (stderr, "Could not close \"%s\".\n", original_file_name);
             exit (2);
@@ -597,14 +598,18 @@ void print_config (frame_info * frame, int *psy, char *inPath,
         return;
 
     fprintf (stderr, "--------------------------------------------\n");
-    if (glopts.enable_jack) {
+    if (glopts.input_select == INPUT_SELECT_JACK) {
         fprintf (stderr, "Input JACK\n");
         fprintf (stderr, "      name %s\n", musicin.jack_name);
     }
-    else {
+    else if (glopts.input_select == INPUT_SELECT_WAV) {
         fprintf (stderr, "Input File : '%s'   %.1f kHz\n",
                 (strcmp (inPath, "-") ? inPath : "stdin"),
                 s_freq[header->version][header->sampling_frequency]);
+    }
+    else if (glopts.input_select == INPUT_SELECT_VLC) {
+        fprintf (stderr, "Input VLC\n");
+        fprintf (stderr, "      URI %s\n", inPath);
     }
 
     fprintf (stderr, "Output File: '%s'\n",
@@ -764,7 +769,7 @@ void parse_args (int argc, char **argv, frame_info * frame, int *psy,
     int brate;
     frame_header *header = frame->header;
     int err = 0, i = 0;
-    long samplerate;
+    long samplerate = 0;
 
     /* preset defaults */
     inPath[0] = '\0';
@@ -884,7 +889,7 @@ void parse_args (int argc, char **argv, frame_info * frame, int *psy,
                         break;
 
                     case 'j':
-                        glopts.enable_jack = 1;
+                        glopts.input_select = INPUT_SELECT_JACK;
                         break;
 
                     case 'b':
@@ -957,6 +962,9 @@ void parse_args (int argc, char **argv, frame_info * frame, int *psy,
                         header->mode = MPG_MD_STEREO; /* force stereo mode */
                         header->mode_ext = 0;
                         break;
+                    case 'V':
+                        glopts.input_select = INPUT_SELECT_VLC;
+                        break;
                     case 'l':
                         argUsed = 1;
                         glopts.athlevel = atof(arg);
@@ -1016,7 +1024,7 @@ void parse_args (int argc, char **argv, frame_info * frame, int *psy,
     if (err)
         usage ();			/* If err has occured, then call usage() */
 
-    if (!glopts.enable_jack && inPath[0] == '\0')
+    if (glopts.input_select != INPUT_SELECT_JACK && inPath[0] == '\0')
         usage ();			/* If not in jack-mode and no file specified, then call usage() */
 
     if (outPath[0] == '\0') {
@@ -1024,13 +1032,13 @@ void parse_args (int argc, char **argv, frame_info * frame, int *psy,
         new_ext (inPath, DFLT_EXT, outPath);
     }
 
-    if (glopts.enable_jack) {
+    if (glopts.input_select == INPUT_SELECT_JACK) {
         musicin.jack_name = inPath;
         *num_samples = MAX_U_32_NUM;
 
         setup_jack(header, musicin.jack_name);
     }
-    else {
+    else if (glopts.input_select == INPUT_SELECT_WAV) {
         if (!strcmp (inPath, "-")) {
             musicin.wav_input = stdin;		/* read from stdin */
             *num_samples = MAX_U_32_NUM;
@@ -1041,6 +1049,14 @@ void parse_args (int argc, char **argv, frame_info * frame, int *psy,
             }
             parse_input_file (musicin.wav_input, inPath, header, num_samples);
         }
+    }
+    else if (glopts.input_select == INPUT_SELECT_VLC) {
+        if (samplerate == 0) {
+            fprintf (stderr, "Samplerate not specified\n");
+            exit (1);
+        }
+        *num_samples = MAX_U_32_NUM;
+        vlc_in_prepare(glopts.verbosity, samplerate, inPath);
     }
 
     /* check for a valid bitrate */

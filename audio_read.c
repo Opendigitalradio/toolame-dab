@@ -9,6 +9,7 @@
 #include <jack/jack.h>
 #include <jack/ringbuffer.h>
 #include "audio_read.h"
+#include "vlc_input.h"
 
 jack_port_t *input_port_left;
 jack_port_t *input_port_right;
@@ -200,7 +201,7 @@ unsigned long read_samples (music_in_t* musicin, short sample_buffer[2304],
     else
         samples_read = samples_to_read;
 
-    if (glopts.enable_jack) {
+    if (glopts.input_select == INPUT_SELECT_JACK) {
         int f = 2;
         while (jack_ringbuffer_read_space(rb) < f * samples_read) {
             /* wait until process() signals more data */
@@ -229,12 +230,21 @@ unsigned long read_samples (music_in_t* musicin, short sample_buffer[2304],
         free(jack_sample_buffer);
 
     }
-    else {
+    else if (glopts.input_select == INPUT_SELECT_WAV) {
         if ((samples_read =
                     fread (sample_buffer, sizeof (short), (int) samples_read,
                         musicin->wav_input)) == 0)
-            fprintf (stderr, "Hit end of audio data\n");
+            fprintf (stderr, "Hit end of WAV audio data\n");
     }
+    else if (glopts.input_select == INPUT_SELECT_VLC) {
+        size_t bytes_read = vlc_in_read(sample_buffer, sizeof(short) * (int)samples_read);
+        if (bytes_read == 0) {
+            fprintf (stderr, "Hit end of VLC audio data\n");
+        }
+
+        samples_read = bytes_read / sizeof(short);
+    }
+
     /*
        Samples are big-endian. If this is a little-endian machine
        we must swap

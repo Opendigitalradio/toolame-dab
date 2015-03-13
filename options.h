@@ -1,6 +1,10 @@
 #ifndef OPTIONS_H
 #define OPTIONS_H
 
+#define INPUT_SELECT_JACK 1
+#define INPUT_SELECT_WAV 2
+#define INPUT_SELECT_VLC 3
+
 typedef struct
 {
   int usepsy;			/* TRUE   by default, use the psy model */
@@ -16,10 +20,11 @@ typedef struct
   float athlevel;                 /* 0      extra argument to the ATH equation - 
 				          used for VBR in LAME */
   int verbosity;                /* 2 by default. 0 is no output at all */
-  int enable_jack; /* 1=use JACK input, 2=use wav input */
+  int input_select; /* 1=use JACK input, 2=use wav input, 3=use VLC input */
   int show_level; /* 1=show the sox-like audio level measurement */
 }
 options;
 
 options glopts;
 #endif
+
