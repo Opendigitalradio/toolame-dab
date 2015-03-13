@@ -470,6 +470,13 @@ parse_input_file (FILE * musicin, char inPath[MAX_NAME_SIZE], frame_header *head
         return;
     }
 
+    if (fseek (musicin, 0L, SEEK_SET) == -1) {
+        fprintf (stderr, "Input is not seekable, assuming pipe with raw PCM\n");
+        fprintf (stderr, "Remember to set samplerate with '-s'.\n");
+        *num_samples = MAX_U_32_NUM;    /* huge sound file */
+        return;
+    }
+
     /****************************  AIFF ********************************/
     if ((soundPosition = aiff_read_headers (musicin, &pcm_aiff_data)) != -1) {
         fprintf (stderr, ">>> Using Audio IFF sound file headers\n");
