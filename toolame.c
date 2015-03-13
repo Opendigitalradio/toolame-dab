@@ -668,7 +668,8 @@ void usage (void)
     fprintf (stdout, "\t-a       downmix from stereo to mono\n");
     fprintf (stdout, "\t-x       force byte-swapping of input\n");
     fprintf (stdout, "\t-g       swap channels of input file\n");
-    fprintf (stdout, "\t-j       enable jack input\n");
+    fprintf (stdout, "\t-j       use jack input\n");
+    fprintf (stdout, "\t-V       use libvlc input\n");
     fprintf (stdout, "\t-L       enable audio level display\n");
     fprintf (stdout, "Output\n");
     fprintf (stdout, "\t-m mode  channel mode : s/d/j/m   (dflt %4c)\n",
@@ -720,7 +721,7 @@ void short_usage (void)
     fprintf (stderr, "tooLAME version %s\n (http://opendigitalradio.org)\n",
             toolameversion);
     fprintf (stderr, "MPEG Audio Layer II encoder for DAB\n\n");
-    fprintf (stderr, "USAGE: %s [options] (<infile>|<jackname>) [outfile]\n\n", programName);
+    fprintf (stderr, "USAGE: %s [options] (<infile>|<jackname>|<libvlc url>) [outfile]\n\n", programName);
     fprintf (stderr, "Try \"%s -h\" for more information.\n", programName);
     exit (0);
 }
@@ -737,6 +738,7 @@ void short_usage (void)
  * syntax:
  *
  * -j  turns on JACK input
+ * -V  turns on libVLC input
  * -L  turns on audio level display
  * -m  is followed by the mode
  * -y  is followed by the psychoacoustic model number
