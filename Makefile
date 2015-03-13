@@ -94,7 +94,7 @@ ARCH = -march=native
 WARNINGS = -Wall
 WARNINGS2 = -Wstrict-prototypes -Wmissing-prototypes -Wunused -Wunused-function -Wunused-label -Wunused-parameter -Wunused-variable -Wunused-value -Wredundant-decls
 
-NEW_02L_FIXES = -DNEWENCODE -DNEWATAN
+NEW_02L_FIXES = -DNEWENCODE
 
 CC_SWITCHES = $(OPTIM) $(REQUIRED) $(ARCH) $(PG) $(TWEAKS) $(WARNINGS) $(NEW_02L_FIXES)
 
