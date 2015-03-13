@@ -70,7 +70,9 @@ void handleStream(
     assert(rate == vlc_rate);
     assert(bits_per_sample == 16);
 
-    const size_t max_length = 4 * size;
+    // 16 is a bit arbitrary, if it's too small we might enter
+    // a deadlock if toolame asks for too much data
+    const size_t max_length = 16 * size;
 
     for (;;) {
         pthread_mutex_lock(&buffer_lock);
