@@ -72,7 +72,7 @@ PG = -g -fomit-frame-pointer
 OPTIM = -O2
 
 # These flags are pretty much mandatory
-REQUIRED = -DNDEBUG -DINLINE=inline
+REQUIRED = -DINLINE=inline
 
 #pick your architecture
 ARCH = -march=native

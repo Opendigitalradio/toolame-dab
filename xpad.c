@@ -51,7 +51,7 @@ int xpad_init(char* pad_fifo, int pad_len)
 
 int xpad_read_len(uint8_t* buf, int len)
 {
-    assert(xpad_fd != 0);
+    if (xpad_fd == 0) return 0;
 
     ssize_t num_read = 0;
 
