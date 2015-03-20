@@ -827,6 +827,8 @@ void parse_args (int argc, char **argv, frame_info * frame, int *psy,
     header->error_protection = FALSE;
     header->dab_extension = 0;
 
+    glopts.input_select = INPUT_SELECT_WAV;
+
     /* process args */
     while (++i < argc && err == 0) {
         char c, *token, *arg, *nextArg;
@@ -1060,6 +1062,11 @@ void parse_args (int argc, char **argv, frame_info * frame, int *psy,
         *num_samples = MAX_U_32_NUM;
         vlc_in_prepare(glopts.verbosity, samplerate, inPath);
     }
+    else {
+        fprintf(stderr, "INVALID INPUT\n");
+        exit(1);
+    }
+
 
     /* check for a valid bitrate */
     if (brate == 0)
