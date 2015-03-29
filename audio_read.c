@@ -237,12 +237,14 @@ unsigned long read_samples (music_in_t* musicin, short sample_buffer[2304],
             fprintf (stderr, "Hit end of WAV audio data\n");
     }
     else if (glopts.input_select == INPUT_SELECT_VLC) {
-        size_t bytes_read = vlc_in_read(sample_buffer, sizeof(short) * (int)samples_read);
-        if (bytes_read == 0) {
-            fprintf (stderr, "Hit end of VLC audio data\n");
+        ssize_t bytes_read = vlc_in_read(sample_buffer, sizeof(short) * (int)samples_read);
+        if (bytes_read == -1) {
+            fprintf (stderr, "VLC input error\n");
+            samples_read = 0;
         }
-
-        samples_read = bytes_read / sizeof(short);
+        else {
+            samples_read = bytes_read / sizeof(short);
+        }
     }
 
     /*

@@ -142,13 +142,10 @@ int vlc_in_prepare(unsigned verbosity, unsigned int rate, const char* uri)
     head_buffer = vlc_buffer_new();
 
     // Start playing
-    libvlc_media_player_play(m_mp);
-
-    fprintf(stderr, "VLC launched.\n");
-    return 0;
+    return libvlc_media_player_play(m_mp);
 }
 
-size_t vlc_in_read(void *buf, size_t len)
+ssize_t vlc_in_read(void *buf, size_t len)
 {
     size_t requested = len;
     for (;;) {
@@ -197,6 +194,11 @@ size_t vlc_in_read(void *buf, size_t len)
 
         pthread_mutex_unlock(&buffer_lock);
         usleep(100);
+
+        libvlc_media_t *media = libvlc_media_player_get_media(m_mp);
+        if (libvlc_media_get_state(media) == libvlc_Error) {
+            return -1;
+        }
     }
 
     abort();

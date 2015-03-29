@@ -37,7 +37,7 @@ void handleStream(
 int vlc_in_prepare(unsigned verbosity, unsigned int rate, const char* uri);
 
 // Read len audio bytes into buf
-size_t vlc_in_read(void *buf, size_t len);
+ssize_t vlc_in_read(void *buf, size_t len);
 
 #endif
 

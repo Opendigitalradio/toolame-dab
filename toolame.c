@@ -1060,7 +1060,10 @@ void parse_args (int argc, char **argv, frame_info * frame, int *psy,
             exit (1);
         }
         *num_samples = MAX_U_32_NUM;
-        vlc_in_prepare(glopts.verbosity, samplerate, inPath);
+        if (vlc_in_prepare(glopts.verbosity, samplerate, inPath) != 0) {
+            fprintf(stderr, "VLC initialisation failed\n");
+            exit(1);
+        }
     }
     else {
         fprintf(stderr, "INVALID INPUT\n");
