@@ -196,7 +196,10 @@ ssize_t vlc_in_read(void *buf, size_t len)
         usleep(100);
 
         libvlc_media_t *media = libvlc_media_player_get_media(m_mp);
-        if (libvlc_media_get_state(media) == libvlc_Error) {
+        libvlc_state_t st = libvlc_media_get_state(media);
+        if (!(st == libvlc_Opening   ||
+              st == libvlc_Buffering ||
+              st == libvlc_Playing) ) {
             return -1;
         }
     }
