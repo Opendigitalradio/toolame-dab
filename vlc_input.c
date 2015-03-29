@@ -101,7 +101,6 @@ void handleStream(
 
 int vlc_in_prepare(unsigned verbosity, unsigned int rate, const char* uri)
 {
-    int err;
     fprintf(stderr, "Initialising VLC...\n");
 
     vlc_rate = rate;
