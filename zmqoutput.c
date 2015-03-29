@@ -70,6 +70,9 @@ int zmqoutput_write_byte(Bit_stream_struc *bs, unsigned char data)
         int send_error = zmq_send(bs->zmq_sock, header, frame_length,
                 ZMQ_DONTWAIT);
 
+        free(header);
+        header = NULL;
+
         if (send_error < 0) {
             fprintf(stderr, "ZeroMQ send failed! %s\n", zmq_strerror(errno));
         }
