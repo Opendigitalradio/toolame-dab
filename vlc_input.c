@@ -141,7 +141,26 @@ int vlc_in_prepare(unsigned verbosity, unsigned int rate, const char* uri)
     head_buffer = vlc_buffer_new();
 
     // Start playing
-    return libvlc_media_player_play(m_mp);
+    int ret = libvlc_media_player_play(m_mp);
+
+    if (ret == 0) {
+        libvlc_media_t *media = libvlc_media_player_get_media(m_mp);
+        libvlc_state_t st;
+
+        ret = -1;
+
+        int timeout;
+        for (timeout = 0; timeout < 100; timeout++) {
+            st = libvlc_media_get_state(media);
+            usleep(10*1000);
+            if (st != libvlc_NothingSpecial) {
+                ret = 0;
+                break;
+            }
+        }
+    }
+
+    return ret;
 }
 
 ssize_t vlc_in_read(void *buf, size_t len)

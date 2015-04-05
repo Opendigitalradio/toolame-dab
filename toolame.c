@@ -26,6 +26,7 @@
 #include "xpad.h"
 #include "utils.h"
 #include "vlc_input.h"
+#include "zmqoutput.h"
 
 #include <assert.h>
 
@@ -540,6 +541,8 @@ int main (int argc, char **argv)
         peak_left = 0;
         peak_right = 0;
     }
+
+    fprintf(stdout, "Main loop has quit with samps_read = %zu\n", samps_read);
 
     close_bit_stream_w (&bs);
 
