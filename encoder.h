@@ -9,7 +9,7 @@
 #define DFLT_LAY        2	/* default encoding layer is II */
 #define DFLT_MOD        'j'	/* default mode is joint stereo */
 #define DFLT_PSY        1	/* default psych model is 1 */
-#define DFLT_SFQ        44.1	/* default input sampling rate is 44.1 kHz */
+#define DFLT_SFQ        48.0	/* default input sampling rate is 48 kHz because DAB */
 #define DFLT_EMP        'n'	/* default de-emphasis is none */
 #define DFLT_EXT        ".mp2"	/* default output file extension */
 #define DFLT_BRI        10	/* default bitrate_index = 10 (192kbps) */
