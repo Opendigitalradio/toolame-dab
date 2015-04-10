@@ -11,6 +11,7 @@ libvlc_instance_t     *m_vlc;
 libvlc_media_player_t *m_mp;
 
 unsigned int vlc_rate;
+unsigned int vlc_channels;
 
 struct vlc_buffer *head_buffer;
 
@@ -66,7 +67,7 @@ void handleStream(
         size_t size,
         int64_t pts)
 {
-    assert(channels == 2);
+    assert(channels == vlc_channels);
     assert(rate == vlc_rate);
     assert(bits_per_sample == 16);
 
@@ -99,11 +100,16 @@ void handleStream(
     }
 }
 
-int vlc_in_prepare(unsigned verbosity, unsigned int rate, const char* uri)
+int vlc_in_prepare(
+        unsigned verbosity,
+        unsigned int rate,
+        const char* uri,
+        unsigned channels)
 {
     fprintf(stderr, "Initialising VLC...\n");
 
     vlc_rate = rate;
+    vlc_channels = channels;
 
     // VLC options
     char smem_options[512];

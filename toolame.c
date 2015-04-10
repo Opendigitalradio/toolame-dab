@@ -1063,7 +1063,8 @@ void parse_args (int argc, char **argv, frame_info * frame, int *psy,
             exit (1);
         }
         *num_samples = MAX_U_32_NUM;
-        if (vlc_in_prepare(glopts.verbosity, samplerate, inPath) != 0) {
+        int channels = (header->mode == MPG_MD_MONO) ? 1 : 2;
+        if (vlc_in_prepare(glopts.verbosity, samplerate, inPath, channels) != 0) {
             fprintf(stderr, "VLC initialisation failed\n");
             exit(1);
         }
