@@ -56,7 +56,7 @@ int xpad_read_len(uint8_t* buf, int len)
     ssize_t num_read = 0;
 
     while (num_read < len) {
-        ssize_t r = read(xpad_fd, buf, len);
+        ssize_t r = read(xpad_fd, buf + num_read, len - num_read);
 
         if(r < 0) {
             if (errno == EAGAIN) {
