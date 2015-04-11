@@ -180,7 +180,7 @@ int main (int argc, char **argv)
     print_config (&frame, &model, original_file_name, encoded_file_name);
 
     uint8_t* xpad_data = NULL;
-    if (mot_file != NULL) {
+    if (mot_file) {
         if (header.dab_length <= 0 ||
                 header.dab_length > 58) {
             fprintf(stderr, "Invalid XPAD length specified\n");
@@ -195,10 +195,6 @@ int main (int argc, char **argv)
 
         xpad_data = malloc(header.dab_length);
     }
-    int xpad_len = xpad_read_len(xpad_data, header.dab_length);
-    if (xpad_len == -1) {
-        return 1;
-    }
 
     /* this will load the alloc tables and do some other stuff */
     hdr_to_frps (&frame);
@@ -207,6 +203,26 @@ int main (int argc, char **argv)
 
     unsigned long samps_read;
     while ((samps_read = get_audio(&musicin, buffer, num_samples, nch, &header)) > 0) {
+        /* Check if we have new PAD data
+         */
+        int xpad_len = 0;
+        if (mot_file) {
+            xpad_len = xpad_read_len(xpad_data, header.dab_length);
+
+            if (xpad_len == -1) {
+                fprintf(stderr, "Error reading XPAD data\n");
+                xpad_len = 0;
+            }
+            else if (xpad_len == 0 ||
+                     xpad_len == header.dab_length) {
+                // everything OK
+            }
+            else {
+                fprintf(stderr, "xpad length=%d\n", xpad_len);
+                abort();
+            }
+        }
+
         unsigned long j;
         for (j = 0; j < samps_read; j++) {
             peak_left  = MAX(peak_left,  buffer[0][j]);
@@ -502,26 +518,6 @@ int main (int argc, char **argv)
         }
         else {
             putbits (&bs, 0, 16); // FPAD is all-zero
-        }
-
-        /* Check if we have new PAD data for the next frame
-         */
-        if (mot_file) {
-            /* set xpad-length for next frame */
-            int new_xpad_len = xpad_read_len(xpad_data, header.dab_length);
-
-            if (new_xpad_len == -1) {
-                fprintf(stderr, "Error reading XPAD data\n");
-                xpad_len = 0;
-            }
-            else if (new_xpad_len == 0 ||
-                     new_xpad_len == header.dab_length) {
-                xpad_len = new_xpad_len;
-            }
-            else {
-                fprintf(stderr, "new xpad length=%d\n", new_xpad_len);
-                abort();
-            }
         }
 
 
