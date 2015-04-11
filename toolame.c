@@ -466,64 +466,64 @@ int main (int argc, char **argv)
         for (i = 0; i < adb; i++)
             put1bit (&bs, 0);
 
-        if (header.dab_extension) {
-            if (xpad_len) {
-                /* Reserve some bytes for X-PAD in DAB mode */
 
-                assert(xpad_len > 2);
+        if (xpad_len) {
+            /* Reserve some bytes for X-PAD in DAB mode */
 
-                for (i=header.dab_length-xpad_len+FPAD_LENGTH; i>0; i--) {
-                    putbits(&bs, 0, 8);
-                }
+            assert(xpad_len > 2);
 
-                for (i = 0; i < xpad_len-FPAD_LENGTH; i++) {
-                    putbits (&bs, xpad_data[i], 8);
-                }
-            }
-            else {
-                for (i=header.dab_length; i>0; i--) {
-                    putbits(&bs, 0, 8);
-                }
+            for (i=header.dab_length-xpad_len+FPAD_LENGTH; i>0; i--) {
+                putbits(&bs, 0, 8);
             }
 
-            for (i = header.dab_extension - 1; i >= 0; i--) {
-                CRC_calcDAB (&frame, bit_alloc, scfsi, scalar, &crc, i);
-                /* this crc is for the previous frame in DAB mode  */
-                if (bs.buf_byte_idx + lg_frame < bs.buf_size)
-                    bs.buf[bs.buf_byte_idx + lg_frame] = crc;
-                /* reserved 2 bytes for F-PAD in DAB mode  */
-                putbits (&bs, crc, 8);
-            }
-
-            if (xpad_len) {
-                /* The F-PAD is also given us by mot-encoder */
-                putbits (&bs, xpad_data[xpad_len-2], 8);
-                putbits (&bs, xpad_data[xpad_len-1], 8);
-            }
-            else {
-                putbits (&bs, 0, 16); // FPAD is all-zero
-            }
-
-            /* Check if we have new PAD data for the next frame
-             */
-            if (mot_file) {
-                /* set xpad-length for next frame */
-                int new_xpad_len = xpad_read_len(xpad_data, header.dab_length);
-
-                if (new_xpad_len == -1) {
-                    fprintf(stderr, "Error reading XPAD data\n");
-                    xpad_len = 0;
-                }
-                else if (new_xpad_len == 0 ||
-                         new_xpad_len == header.dab_length) {
-                    xpad_len = new_xpad_len;
-                }
-                else {
-                    fprintf(stderr, "new xpad length=%d\n", new_xpad_len);
-                    abort();
-                }
+            for (i = 0; i < xpad_len-FPAD_LENGTH; i++) {
+                putbits (&bs, xpad_data[i], 8);
             }
         }
+        else {
+            for (i=header.dab_length; i>0; i--) {
+                putbits(&bs, 0, 8);
+            }
+        }
+
+        for (i = header.dab_extension - 1; i >= 0; i--) {
+            CRC_calcDAB (&frame, bit_alloc, scfsi, scalar, &crc, i);
+            /* this crc is for the previous frame in DAB mode  */
+            if (bs.buf_byte_idx + lg_frame < bs.buf_size)
+                bs.buf[bs.buf_byte_idx + lg_frame] = crc;
+            /* reserved 2 bytes for F-PAD in DAB mode  */
+            putbits (&bs, crc, 8);
+        }
+
+        if (xpad_len) {
+            /* The F-PAD is also given us by mot-encoder */
+            putbits (&bs, xpad_data[xpad_len-2], 8);
+            putbits (&bs, xpad_data[xpad_len-1], 8);
+        }
+        else {
+            putbits (&bs, 0, 16); // FPAD is all-zero
+        }
+
+        /* Check if we have new PAD data for the next frame
+         */
+        if (mot_file) {
+            /* set xpad-length for next frame */
+            int new_xpad_len = xpad_read_len(xpad_data, header.dab_length);
+
+            if (new_xpad_len == -1) {
+                fprintf(stderr, "Error reading XPAD data\n");
+                xpad_len = 0;
+            }
+            else if (new_xpad_len == 0 ||
+                     new_xpad_len == header.dab_length) {
+                xpad_len = new_xpad_len;
+            }
+            else {
+                fprintf(stderr, "new xpad length=%d\n", new_xpad_len);
+                abort();
+            }
+        }
+
 
         frameBits = sstell (&bs) - sentBits;
 
