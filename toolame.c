@@ -273,7 +273,7 @@ int main (int argc, char **argv)
             /* see bitstream.c            */
             if (frameNum == 1)
                 minimum = lg_frame + MINIMUM;
-            adb -= header.dab_extension * 8 + header.dab_length * 8 + 16;
+            adb -= header.dab_extension * 8 + (xpad_len ? xpad_len : FPAD_LENGTH) * 8;
         }
 
         {
@@ -483,24 +483,13 @@ int main (int argc, char **argv)
             put1bit (&bs, 0);
 
 
-        if (xpad_len) {
-            /* Reserve some bytes for X-PAD in DAB mode */
-
+        if (xpad_len)
             assert(xpad_len > 2);
 
-            for (i=header.dab_length-xpad_len+FPAD_LENGTH; i>0; i--) {
-                putbits(&bs, 0, 8);
-            }
+        // insert available X-PAD
+        for (i = 0; i < xpad_len - FPAD_LENGTH; i++)
+            putbits (&bs, xpad_data[i], 8);
 
-            for (i = 0; i < xpad_len-FPAD_LENGTH; i++) {
-                putbits (&bs, xpad_data[i], 8);
-            }
-        }
-        else {
-            for (i=header.dab_length; i>0; i--) {
-                putbits(&bs, 0, 8);
-            }
-        }
 
         for (i = header.dab_extension - 1; i >= 0; i--) {
             CRC_calcDAB (&frame, bit_alloc, scfsi, scalar, &crc, i);
