@@ -187,13 +187,13 @@ int main (int argc, char **argv)
             return 1;
         }
 
-        int err = xpad_init(mot_file, header.dab_length);
+        int err = xpad_init(mot_file, header.dab_length + 1);
         if (err == -1) {
             fprintf(stderr, "XPAD reader initialisation failed\n");
             return 1;
         }
 
-        xpad_data = malloc(header.dab_length);
+        xpad_data = malloc(header.dab_length + 1);
     }
 
     /* this will load the alloc tables and do some other stuff */
@@ -207,15 +207,18 @@ int main (int argc, char **argv)
          */
         int xpad_len = 0;
         if (mot_file) {
-            xpad_len = xpad_read_len(xpad_data, header.dab_length);
+            xpad_len = xpad_read_len(xpad_data, header.dab_length + 1);
 
             if (xpad_len == -1) {
                 fprintf(stderr, "Error reading XPAD data\n");
                 xpad_len = 0;
             }
-            else if (xpad_len == 0 ||
-                     xpad_len == header.dab_length) {
+            else if (xpad_len == 0) {
+                // no PAD available
+            }
+            else if (xpad_len == header.dab_length + 1) {
                 // everything OK
+                xpad_len = xpad_data[header.dab_length];
             }
             else {
                 fprintf(stderr, "xpad length=%d\n", xpad_len);
@@ -483,12 +486,13 @@ int main (int argc, char **argv)
             put1bit (&bs, 0);
 
 
-        if (xpad_len)
+        if (xpad_len) {
             assert(xpad_len > 2);
 
-        // insert available X-PAD
-        for (i = 0; i < xpad_len - FPAD_LENGTH; i++)
-            putbits (&bs, xpad_data[i], 8);
+            // insert available X-PAD
+            for (i = header.dab_length - xpad_len; i < header.dab_length - FPAD_LENGTH; i++)
+                putbits (&bs, xpad_data[i], 8);
+        }
 
 
         for (i = header.dab_extension - 1; i >= 0; i--) {
@@ -502,8 +506,8 @@ int main (int argc, char **argv)
 
         if (xpad_len) {
             /* The F-PAD is also given us by mot-encoder */
-            putbits (&bs, xpad_data[xpad_len-2], 8);
-            putbits (&bs, xpad_data[xpad_len-1], 8);
+            putbits (&bs, xpad_data[header.dab_length - 2], 8);
+            putbits (&bs, xpad_data[header.dab_length - 1], 8);
         }
         else {
             putbits (&bs, 0, 16); // FPAD is all-zero
