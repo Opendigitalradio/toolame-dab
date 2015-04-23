@@ -171,6 +171,12 @@ int vlc_in_prepare(
 
 ssize_t vlc_in_read(void *buf, size_t len)
 {
+    if (len == 0) {
+        return 0;
+    }
+
+    assert(buf);
+
     size_t requested = len;
     for (;;) {
         pthread_mutex_lock(&buffer_lock);
@@ -199,6 +205,7 @@ ssize_t vlc_in_read(void *buf, size_t len)
 
             if (len > 0) {
                 assert(len < head_buffer->size);
+                assert(head_buffer->buf);
 
                 memcpy(buf, head_buffer->buf, len);
 
