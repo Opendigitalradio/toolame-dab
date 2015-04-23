@@ -33,7 +33,7 @@
 music_in_t musicin;
 Bit_stream_struc bs;
 char *programName;
-char toolameversion[] = "0.2l-opendigitalradio";
+char toolameversion[] = "0.2l-ODR-" GIT_VERSION;
 
 const int FPAD_LENGTH=2;
 
@@ -647,11 +647,11 @@ void usage (void)
 {				/* print syntax & exit */
     /* FIXME: maybe have an option to display better definitions of help codes, and
        long equivalents of the flags */
-    fprintf (stdout, "\ntooLAME version %s (http://opendigitalradio.org)\n",
+    fprintf (stdout, "\nToolame-DAB version %s\n (http://opendigitalradio.org)\n",
             toolameversion);
     fprintf (stdout, "MPEG Audio Layer II encoder for DAB\n\n");
     fprintf (stdout, "usage: \n");
-    fprintf (stdout, "\t%s [options] <input> <output>\n\n", programName);
+    fprintf (stdout, "\t%s [options] (<infile>|-j <jackname>|-V <libvlc url>) <output>\n\n", programName);
 
     fprintf (stdout, "Options:\n");
     fprintf (stdout, "Input\n");
@@ -710,10 +710,10 @@ void usage (void)
 void short_usage (void)
 {
     /* print a bit of info about the program */
-    fprintf (stderr, "tooLAME version %s\n (http://opendigitalradio.org)\n",
+    fprintf (stderr, "Toolame-DAB version %s\n (http://opendigitalradio.org)\n",
             toolameversion);
     fprintf (stderr, "MPEG Audio Layer II encoder for DAB\n\n");
-    fprintf (stderr, "USAGE: %s [options] (<infile>|<jackname>|<libvlc url>) [outfile]\n\n", programName);
+    fprintf (stderr, "USAGE: %s [options] (<infile>|-j <jackname>|-V <libvlc url>) [output]\n\n", programName);
     fprintf (stderr, "Try \"%s -h\" for more information.\n", programName);
     exit (0);
 }

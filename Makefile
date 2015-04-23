@@ -66,6 +66,8 @@ c_sources = \
 
 OBJ = $(c_sources:.c=.o)
 
+GIT_VER = -DGIT_VERSION="\"`sh git-version.sh`\""
+
 #Uncomment this if you want to do some profiling/debugging
 #PG = -g -pg
 PG = -g -fomit-frame-pointer
@@ -74,7 +76,7 @@ PG = -g -fomit-frame-pointer
 OPTIM = -O2
 
 # These flags are pretty much mandatory
-REQUIRED = -DINLINE=inline
+REQUIRED = -DINLINE=inline ${GIT_VER}
 
 #pick your architecture
 ARCH = -march=native
