@@ -177,7 +177,7 @@ ssize_t vlc_in_read(void *buf, size_t len)
 
         if (vlc_buffer_totalsize(head_buffer) >= len) {
             while (len >= head_buffer->size) {
-                if (head_buffer->buf) {
+                if (head_buffer->buf && head_buffer->size) {
                     // Get all the data from this list element
                     memcpy(buf, head_buffer->buf, head_buffer->size);
 
