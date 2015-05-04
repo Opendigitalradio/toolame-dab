@@ -317,7 +317,7 @@ int check_vlc_uses_size_t()
     if (major_ver_sz) {
         int major_ver = atoi(major_ver_sz);
 
-        char *minor_ver_sz = strtok_r(libvlc_version, ".", &saveptr);
+        char *minor_ver_sz = strtok_r(NULL, ".", &saveptr);
         if (minor_ver_sz) {
             int minor_ver = atoi(minor_ver_sz);
 
