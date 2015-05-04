@@ -6,6 +6,9 @@
 #include <stdio.h>
 #include "vlc_input.h"
 
+int check_vlc_uses_size_t();
+struct vlc_buffer* vlc_buffer_new();
+void vlc_buffer_free(struct vlc_buffer* node);
 
 libvlc_instance_t     *m_vlc;
 libvlc_media_player_t *m_mp;
@@ -45,19 +48,25 @@ size_t vlc_buffer_totalsize(struct vlc_buffer* node)
 }
 
 // VLC Audio prerender callback, we must allocate a buffer here
-void prepareRender(
+void prepareRender_size_t(
         void* p_audio_data,
         uint8_t** pp_pcm_buffer,
         size_t size)
 {
     *pp_pcm_buffer = malloc(size);
-    return;
+}
+
+void prepareRender(
+        void* p_audio_data,
+        uint8_t** pp_pcm_buffer,
+        unsigned int size)
+{
+    *pp_pcm_buffer = malloc(size);
 }
 
 
-
 // Audio postrender callback
-void handleStream(
+void handleStream_size_t(
         void* p_audio_data,
         uint8_t* p_pcm_buffer,
         unsigned int channels,
@@ -100,6 +109,28 @@ void handleStream(
     }
 }
 
+// convert from unsigned int size to size_t size
+void handleStream(
+        void* p_audio_data,
+        uint8_t* p_pcm_buffer,
+        unsigned int channels,
+        unsigned int rate,
+        unsigned int nb_samples,
+        unsigned int bits_per_sample,
+        unsigned int size,
+        int64_t pts)
+{
+    handleStream_size_t(
+        p_audio_data,
+        p_pcm_buffer,
+        channels,
+        rate,
+        nb_samples,
+        bits_per_sample,
+        size,
+        pts);
+}
+
 int vlc_in_prepare(
         unsigned verbosity,
         unsigned int rate,
@@ -107,6 +138,28 @@ int vlc_in_prepare(
         unsigned channels)
 {
     fprintf(stderr, "Initialising VLC...\n");
+
+    long long int handleStream_address;
+    long long int prepareRender_address;
+
+    int vlc_version_check = check_vlc_uses_size_t();
+    if (vlc_version_check == 0) {
+        fprintf(stderr, "You are using VLC with unsigned int size callbacks\n");
+
+        handleStream_address = (long long int)(intptr_t)(void*)&handleStream;
+        prepareRender_address = (long long int)(intptr_t)(void*)&prepareRender;
+    }
+    else if (vlc_version_check == 1) {
+        fprintf(stderr, "You are using VLC with size_t size callbacks\n");
+
+        handleStream_address = (long long int)(intptr_t)(void*)&handleStream_size_t;
+        prepareRender_address = (long long int)(intptr_t)(void*)&prepareRender_size_t;
+    }
+    else {
+        fprintf(stderr, "Error detecting VLC version!\n");
+        fprintf(stderr, "      you are using %s\n", libvlc_get_version());
+        return -1;
+    }
 
     vlc_rate = rate;
     vlc_channels = channels;
@@ -122,8 +175,8 @@ int vlc_in_prepare(
                 "audio-prerender-callback=%lld"
             "}",
             vlc_rate,
-            (long long int)(intptr_t)(void*)&handleStream,
-            (long long int)(intptr_t)(void*)&prepareRender);
+            handleStream_address,
+            prepareRender_address);
 
     char verb_options[512];
     snprintf(verb_options, sizeof(verb_options),
@@ -236,5 +289,42 @@ ssize_t vlc_in_read(void *buf, size_t len)
     }
 
     abort();
+}
+
+
+/* VLC up to version 2.1.0 used a different callback function signature.
+ * VLC 2.2.0 uses size_t
+ *
+ * \return 1 if the callback with size_t size should be used.
+ *         0 if the callback with unsigned int size should be used.
+ *        -1 if there was an error.
+ */
+int check_vlc_uses_size_t()
+{
+    int retval = -1;
+
+    char libvlc_version[256];
+    strncpy(libvlc_version, libvlc_get_version(), 256);
+
+    char *space_position = strstr(libvlc_version, " ");
+
+    if (space_position) {
+        *space_position = '\0';
+    }
+
+    char *saveptr;
+    char *major_ver_sz = strtok_r(libvlc_version, ".", &saveptr);
+    if (major_ver_sz) {
+        int major_ver = atoi(major_ver_sz);
+
+        char *minor_ver_sz = strtok_r(libvlc_version, ".", &saveptr);
+        if (minor_ver_sz) {
+            int minor_ver = atoi(minor_ver_sz);
+
+            retval = (major_ver >= 2 && minor_ver >= 2) ? 1 : 0;
+        }
+    }
+
+    return retval;
 }
 

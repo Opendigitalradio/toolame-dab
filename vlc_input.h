@@ -12,27 +12,6 @@ struct vlc_buffer {
     struct vlc_buffer *next;
 };
 
-struct vlc_buffer* vlc_buffer_new();
-void vlc_buffer_free(struct vlc_buffer* node);
-
-
-// VLC Audio prerender callback
-void prepareRender(
-        void* p_audio_data,
-        uint8_t** pp_pcm_buffer,
-        size_t size);
-
-// Audio postrender callback
-void handleStream(
-        void* p_audio_data,
-        uint8_t* p_pcm_buffer,
-        unsigned int channels,
-        unsigned int rate,
-        unsigned int nb_samples,
-        unsigned int bits_per_sample,
-        size_t size,
-        int64_t pts);
-
 // Open the VLC input
 int vlc_in_prepare(
         unsigned verbosity,
