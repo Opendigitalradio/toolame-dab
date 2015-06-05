@@ -42,7 +42,7 @@ See http://opendigitalradio.org
 INSTALLATION
 *********************
 
-0. install zeromq 4.0.3 and JACK
+0. install zeromq 4.0.3 or newer and JACK
 1. edit Makefile
    maybe change the architecture type (ARCH) to suit your machine.
 2. 'make'
@@ -66,7 +66,10 @@ Output
     file is automatically renamed from *.* to *.mp2
     for stdout use a -
     for zeromq use tcp://<hostname>:<port> pointing to
-        a ODR-DabMux
+        a ODR-DabMux. You can put more than one endpoint,
+        separated by a semicolon. Mind that the shell might
+        interpret the semicolon: use quotes around the list
+        of endpoints to avoid this.
 
 Input Options
     -s [int]

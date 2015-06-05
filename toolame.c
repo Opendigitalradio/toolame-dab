@@ -693,6 +693,8 @@ void usage (void)
             "\tinput    input sound file. (WAV,AIFF,PCM or use '/dev/stdin')\n");
     fprintf (stdout, "\toutput   output bit stream of encoded audio\n");
     fprintf (stdout, "\t         prefix with tcp:// to use a ZMQ output\n");
+    fprintf (stdout, "\t         Several ZMQ destinations can be given,\n");
+    fprintf (stdout, "\t         separated by semicolons.\n");
     fprintf (stdout,
             "\n\tAllowable bitrates for 16, 22.05 and 24kHz sample input\n");
     fprintf (stdout,

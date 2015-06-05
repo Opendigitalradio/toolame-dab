@@ -22,7 +22,10 @@ struct zmq_frame_header
 } __attribute__ ((packed));
 
 
-int zmqoutput_open(Bit_stream_struc * bs, char* uri);
+/* Open the zmq socket and connect it to all URIs in the list.
+ * The URIs are semicolon delimited
+ */
+int zmqoutput_open(Bit_stream_struc * bs, const char* uri_list);
 
 int zmqoutput_write_byte(Bit_stream_struc *bs, unsigned char data);
 

@@ -22,7 +22,7 @@ void zmqoutput_set_peaks(int left, int right)
     zmq_peak_right = right;
 }
 
-int zmqoutput_open(Bit_stream_struc *bs, char* uri)
+int zmqoutput_open(Bit_stream_struc *bs, const char* uri_list)
 {
     zmq_context = zmq_ctx_new();
     bs->zmq_sock = zmq_socket(zmq_context, ZMQ_PUB);
@@ -31,11 +31,29 @@ int zmqoutput_open(Bit_stream_struc *bs, char* uri)
                 zmq_strerror(errno));
         return -1;
     }
-    if (zmq_connect(bs->zmq_sock, uri) != 0) {
-        fprintf(stderr, "Error occurred during zmq_connect: %s\n",
-                zmq_strerror(errno));
-        return -1;
+
+    char* uris = strdup(uri_list);
+    char* saveptr = NULL;
+
+    for (; ; uris = NULL) {
+        char* uri = strtok_r(uris, ";", &saveptr);
+
+
+        if (uri) {
+            fprintf(stderr, "Connecting ZMQ to %s\n", uri);
+            if (zmq_connect(bs->zmq_sock, uri) != 0) {
+                fprintf(stderr, "Error occurred during zmq_connect: %s\n",
+                        zmq_strerror(errno));
+                free(uris);
+                return -1;
+            }
+        }
+        else {
+            break;
+        }
     }
+
+    free(uris);
 
     zmqbuf = (unsigned char*)malloc(bs->zmq_framesize);
     if (zmqbuf == NULL) {
