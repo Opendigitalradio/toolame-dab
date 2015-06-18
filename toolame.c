@@ -136,6 +136,7 @@ int main (int argc, char **argv)
     int peak_right = 0;
 
     char* mot_file = NULL;
+    char* icy_file = NULL;
 
     /* Used to keep the SNR values for the fast/quick psy models */
     static FLOAT smrdef[2][32];
@@ -176,7 +177,7 @@ int main (int argc, char **argv)
         short_usage ();
     else
         parse_args (argc, argv, &frame, &model, &num_samples, original_file_name,
-                encoded_file_name, &mot_file);
+                encoded_file_name, &mot_file, &icy_file);
     print_config (&frame, &model, original_file_name, encoded_file_name);
 
     uint8_t* xpad_data = NULL;
@@ -513,6 +514,10 @@ int main (int argc, char **argv)
             putbits (&bs, 0, 16); // FPAD is all-zero
         }
 
+        if (glopts.input_select == INPUT_SELECT_VLC) {
+            vlc_in_write_icy();
+        }
+
 
         frameBits = sstell (&bs) - sentBits;
 
@@ -662,6 +667,7 @@ void usage (void)
     fprintf (stdout, "\t-g       swap channels of input file\n");
     fprintf (stdout, "\t-j       use jack input\n");
     fprintf (stdout, "\t-V       use libvlc input\n");
+    fprintf (stdout, "\t-W file  when using libvlc input, write the ICY-Text to file\n");
     fprintf (stdout, "\t-L       enable audio level display\n");
     fprintf (stdout, "Output\n");
     fprintf (stdout, "\t-m mode  channel mode : s/d/j/m   (dflt %4c)\n",
@@ -759,7 +765,7 @@ void short_usage (void)
 
 void parse_args (int argc, char **argv, frame_info * frame, int *psy,
         unsigned long *num_samples, char inPath[MAX_NAME_SIZE],
-        char outPath[MAX_NAME_SIZE], char **mot_file)
+        char outPath[MAX_NAME_SIZE], char **mot_file, char **icy_file)
 {
     FLOAT srate;
     int brate;
@@ -963,6 +969,10 @@ void parse_args (int argc, char **argv, frame_info * frame, int *psy,
                     case 'V':
                         glopts.input_select = INPUT_SELECT_VLC;
                         break;
+                    case 'W':
+                        argUsed = 1;
+                        *icy_file = arg;
+                        break;
                     case 'l':
                         argUsed = 1;
                         glopts.athlevel = atof(arg);
@@ -1055,7 +1065,7 @@ void parse_args (int argc, char **argv, frame_info * frame, int *psy,
         }
         *num_samples = MAX_U_32_NUM;
         int channels = (header->mode == MPG_MD_MONO) ? 1 : 2;
-        if (vlc_in_prepare(glopts.verbosity, samplerate, inPath, channels) != 0) {
+        if (vlc_in_prepare(glopts.verbosity, samplerate, inPath, channels, *icy_file) != 0) {
             fprintf(stderr, "VLC initialisation failed\n");
             exit(1);
         }

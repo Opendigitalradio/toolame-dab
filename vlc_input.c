@@ -1,5 +1,7 @@
 #include <stdlib.h>
+#include <errno.h>
 #include <pthread.h>
+#include <semaphore.h>
 #include <assert.h>
 #include <unistd.h>
 #include <string.h>
@@ -17,6 +19,23 @@ unsigned int vlc_rate;
 unsigned int vlc_channels;
 
 struct vlc_buffer *head_buffer;
+
+// now playing information can get written to
+// a file. This writing happens in a separate thread
+#define NOWPLAYING_LEN 512
+char vlc_nowplaying[NOWPLAYING_LEN];
+int vlc_nowplaying_running;
+pthread_t vlc_nowplaying_thread;
+const char* vlc_nowplaying_filename;
+
+struct icywriter_task_data {
+    char        text[NOWPLAYING_LEN];
+    int         success;
+    sem_t       sem;
+};
+
+struct icywriter_task_data icy_task_data;
+
 
 pthread_mutex_t buffer_lock = PTHREAD_MUTEX_INITIALIZER;
 
@@ -135,9 +154,14 @@ int vlc_in_prepare(
         unsigned verbosity,
         unsigned int rate,
         const char* uri,
-        unsigned channels)
+        unsigned channels,
+        const char* icy_write_file
+        )
 {
     fprintf(stderr, "Initialising VLC...\n");
+
+    vlc_nowplaying_running = 0;
+    vlc_nowplaying_filename = icy_write_file;
 
     long long int handleStream_address;
     long long int prepareRender_address;
@@ -286,9 +310,74 @@ ssize_t vlc_in_read(void *buf, size_t len)
               st == libvlc_Playing) ) {
             return -1;
         }
+
+        char* nowplaying_sz = libvlc_media_get_meta(media, libvlc_meta_NowPlaying);
+        if (nowplaying_sz) {
+            snprintf(vlc_nowplaying, NOWPLAYING_LEN, "%s", nowplaying_sz);
+            free(nowplaying_sz);
+        }
     }
 
     abort();
+}
+
+// This task is run in a separate thread
+void* vlc_in_write_icy_task(void* arg)
+{
+    struct icywriter_task_data* data = arg;
+
+    FILE* fd = fopen(vlc_nowplaying_filename, "wb");
+    if (fd) {
+        int ret = fputs(data->text, fd);
+        fclose(fd);
+
+        if (ret >= 0) {
+            data->success = 1;
+        }
+    }
+    else {
+        data->success = 0;
+    }
+
+    sem_post(&data->sem);
+}
+
+void vlc_in_write_icy(void)
+{
+    if (vlc_nowplaying_filename == NULL) {
+        return;
+    }
+    else if (vlc_nowplaying_running == 0) {
+        memcpy(icy_task_data.text, vlc_nowplaying, NOWPLAYING_LEN);
+        icy_task_data.success = 0;
+
+        int ret = sem_init(&icy_task_data.sem, 0, 0);
+        if (ret == 0) {
+            ret = pthread_create(&vlc_nowplaying_thread, NULL, vlc_in_write_icy_task, &icy_task_data);
+        }
+        else {
+            fprintf(stderr, "ICY Text writer: semaphore init failed: %s\n", strerror(errno));
+        }
+
+        if (ret == 0) {
+            vlc_nowplaying_running = 1;
+        }
+        else {
+            fprintf(stderr, "ICY Text writer: thread start failed: %s\n", strerror(ret));
+        }
+    }
+    else {
+        int ret = sem_trywait(&icy_task_data.sem);
+        if (ret == -1 && errno == EAGAIN) {
+            return;
+        }
+        else if (ret == 0) {
+            ret = pthread_join(vlc_nowplaying_thread, NULL);
+            vlc_nowplaying_running = 0;
+        }
+
+        return ret;
+    }
 }
 
 
