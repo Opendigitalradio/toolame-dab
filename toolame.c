@@ -181,8 +181,7 @@ int main (int argc, char **argv)
 
     uint8_t* xpad_data = NULL;
     if (mot_file) {
-        if (header.dab_length <= 0 ||
-                header.dab_length > 58) {
+        if (header.dab_length <= 0) {
             fprintf(stderr, "Invalid XPAD length specified\n");
             return 1;
         }
