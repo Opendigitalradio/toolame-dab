@@ -17,10 +17,13 @@ int vlc_in_prepare(
         unsigned verbosity,
         unsigned int rate,
         const char* uri,
-        unsigned channels);
+        unsigned channels,
+        const char* icy_write_file);
 
 // Read len audio bytes into buf
 ssize_t vlc_in_read(void *buf, size_t len);
+
+void vlc_in_write_icy(void);
 
 #endif
 
