@@ -76,7 +76,7 @@ PG = -g -fomit-frame-pointer
 OPTIM = -O2
 
 # These flags are pretty much mandatory
-REQUIRED = -DINLINE=inline ${GIT_VER}
+REQUIRED = -DINLINE= ${GIT_VER}
 
 #pick your architecture
 ARCH = -march=native
