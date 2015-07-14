@@ -340,6 +340,7 @@ void* vlc_in_write_icy_task(void* arg)
     }
 
     sem_post(&data->sem);
+    return NULL;
 }
 
 void vlc_in_write_icy(void)
@@ -373,10 +374,15 @@ void vlc_in_write_icy(void)
         }
         else if (ret == 0) {
             ret = pthread_join(vlc_nowplaying_thread, NULL);
+            if (ret != 0) {
+                fprintf(stderr, "ICY Text writer: pthread_join error: %s\n", strerror(ret));
+            }
+
             vlc_nowplaying_running = 0;
         }
-
-        return ret;
+        else {
+            fprintf(stderr, "ICY Text writer: semaphore trywait failed: %s\n", strerror(errno));
+        }
     }
 }
 
