@@ -5,9 +5,11 @@
 #include "encoder.h"
 #include "options.h"
 #include "portableio.h"
+#if defined(JACK_INPUT)
 #include <pthread.h>
 #include <jack/jack.h>
 #include <jack/ringbuffer.h>
+#endif
 #include "audio_read.h"
 #include "vlc_input.h"
 
