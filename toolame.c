@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <pthread.h>
 #include <jack/jack.h>
 #include <jack/ringbuffer.h>
 #include "common.h"
@@ -666,12 +665,19 @@ void usage (void)
     fprintf (stdout, "\t-a       downmix from stereo to mono\n");
     fprintf (stdout, "\t-x       force byte-swapping of input\n");
     fprintf (stdout, "\t-g       swap channels of input file\n");
+
+#if defined(JACK_INPUT)
     fprintf (stdout, "\t-j       use jack input\n");
+#else
+    fprintf (stdout, "\t-j       DISABLED: JACK input not compiled in\n");
+#endif
+
 #if defined(VLC_INPUT)
     fprintf (stdout, "\t-V       use libvlc input\n");
 #else
     fprintf (stdout, "\t-V       DISABLED: libvlc input not compiled in\n");
 #endif
+
     fprintf (stdout, "\t-W file  when using libvlc input, write the ICY-Text to file\n");
     fprintf (stdout, "\t-L       enable audio level display\n");
     fprintf (stdout, "Output\n");
@@ -1049,7 +1055,12 @@ void parse_args (int argc, char **argv, frame_info * frame, int *psy,
         musicin.jack_name = inPath;
         *num_samples = MAX_U_32_NUM;
 
+#if defined(JACK_INPUT)
         setup_jack(header, musicin.jack_name);
+#else
+        fprintf(stderr, "JACK input not compiled in\n");
+        exit(1);
+#endif
     }
     else if (glopts.input_select == INPUT_SELECT_WAV) {
         if (!strcmp (inPath, "-")) {

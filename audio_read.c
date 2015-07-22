@@ -11,6 +11,7 @@
 #include "audio_read.h"
 #include "vlc_input.h"
 
+#if defined(JACK_INPUT)
 jack_port_t *input_port_left;
 jack_port_t *input_port_right;
 jack_client_t *client;
@@ -170,6 +171,7 @@ void jack_shutdown(void *arg)
 
     pthread_cond_signal(&data_ready);
 }
+#endif // defined(JACK_INPUT)
 
 /************************************************************************
  *
@@ -201,7 +203,9 @@ unsigned long read_samples (music_in_t* musicin, short sample_buffer[2304],
     else
         samples_read = samples_to_read;
 
-    if (glopts.input_select == INPUT_SELECT_JACK) {
+    if (0) { }
+#if defined(JACK_INPUT)
+    else if (glopts.input_select == INPUT_SELECT_JACK) {
         int f = 2;
         while (jack_ringbuffer_read_space(rb) < f * samples_read) {
             /* wait until process() signals more data */
@@ -230,6 +234,7 @@ unsigned long read_samples (music_in_t* musicin, short sample_buffer[2304],
         free(jack_sample_buffer);
 
     }
+#endif // defined(JACK_INPUT)
     else if (glopts.input_select == INPUT_SELECT_WAV) {
         if ((samples_read =
                     fread (sample_buffer, sizeof (short), (int) samples_read,

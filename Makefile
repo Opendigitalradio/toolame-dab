@@ -1,6 +1,9 @@
 # Set this to 0 to disable compiling the libvlc input
 ENABLE_INPUT_VLC=1
 
+# Set this to 0 to disable compiling the JACK input
+ENABLE_INPUT_JACK=1
+
 CC = gcc
 
 HEADERS = \
@@ -79,14 +82,22 @@ OPTIM = -O2
 
 ifeq (${ENABLE_INPUT_VLC},1)
 	VLC_CFLAGS=-DVLC_INPUT
-	VLC_LDFLAGS=-lvlc
+	VLC_LDFLAGS=-lvlc -lpthread
 else
 	VLC_CFLAGS=
 	VLC_LDFLAGS=
 endif
 
+ifeq (${ENABLE_INPUT_JACK},1)
+	JACK_CFLAGS=-DJACK_INPUT
+	JACK_LDFLAGS=-ljack -lpthread
+else
+	JACK_CFLAGS=
+	JACK_LDFLAGS=
+endif
+
 # These flags are pretty much mandatory
-REQUIRED = -DINLINE= ${GIT_VER} ${VLC_CFLAGS}
+REQUIRED = -DINLINE= ${GIT_VER} ${VLC_CFLAGS} ${JACK_CFLAGS}
 
 #pick your architecture
 ARCH = -march=native
@@ -112,7 +123,7 @@ CC_SWITCHES = $(OPTIM) $(REQUIRED) $(ARCH) $(PG) $(TWEAKS) $(WARNINGS) $(NEW_02L
 
 PGM = toolame
 
-LIBS =  -lm -lzmq -ljack -lpthread ${VLC_LDFLAGS}
+LIBS =  -lm -lzmq ${VLC_LDFLAGS} ${JACK_LDFLAGS}
 
 #nick burch's OS/2 fix  gagravarr@SoftHome.net
 UNAME = $(shell uname)
