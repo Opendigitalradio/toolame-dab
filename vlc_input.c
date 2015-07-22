@@ -1,3 +1,6 @@
+#include "vlc_input.h"
+
+#if defined(VLC_INPUT)
 #include <stdlib.h>
 #include <errno.h>
 #include <pthread.h>
@@ -6,9 +9,6 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdio.h>
-#include "vlc_input.h"
-
-#if defined(VLC_INPUT)
 
 int check_vlc_uses_size_t();
 struct vlc_buffer* vlc_buffer_new();
