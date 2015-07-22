@@ -8,6 +8,8 @@
 #include <stdio.h>
 #include "vlc_input.h"
 
+#if defined(VLC_INPUT)
+
 int check_vlc_uses_size_t();
 struct vlc_buffer* vlc_buffer_new();
 void vlc_buffer_free(struct vlc_buffer* node);
@@ -422,4 +424,6 @@ int check_vlc_uses_size_t()
 
     return retval;
 }
+
+#endif // defined(VLC_INPUT)
 

@@ -513,9 +513,11 @@ int main (int argc, char **argv)
             putbits (&bs, 0, 16); // FPAD is all-zero
         }
 
+#if defined(VLC_INPUT)
         if (glopts.input_select == INPUT_SELECT_VLC) {
             vlc_in_write_icy();
         }
+#endif
 
 
         frameBits = sstell (&bs) - sentBits;
@@ -665,7 +667,11 @@ void usage (void)
     fprintf (stdout, "\t-x       force byte-swapping of input\n");
     fprintf (stdout, "\t-g       swap channels of input file\n");
     fprintf (stdout, "\t-j       use jack input\n");
+#if defined(VLC_INPUT)
     fprintf (stdout, "\t-V       use libvlc input\n");
+#else
+    fprintf (stdout, "\t-V       DISABLED: libvlc input not compiled in\n");
+#endif
     fprintf (stdout, "\t-W file  when using libvlc input, write the ICY-Text to file\n");
     fprintf (stdout, "\t-L       enable audio level display\n");
     fprintf (stdout, "Output\n");
@@ -1064,10 +1070,15 @@ void parse_args (int argc, char **argv, frame_info * frame, int *psy,
         }
         *num_samples = MAX_U_32_NUM;
         int channels = (header->mode == MPG_MD_MONO) ? 1 : 2;
+#if defined(VLC_INPUT)
         if (vlc_in_prepare(glopts.verbosity, samplerate, inPath, channels, *icy_file) != 0) {
             fprintf(stderr, "VLC initialisation failed\n");
             exit(1);
         }
+#else
+        fprintf(stderr, "VLC input not compiled in\n");
+        exit(1);
+#endif
     }
     else {
         fprintf(stderr, "INVALID INPUT\n");

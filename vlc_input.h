@@ -1,6 +1,8 @@
 #ifndef __VLC_INPUT_H_
 #define __VLC_INPUT_H_
 
+#  if defined(VLC_INPUT)
+
 #include <stdint.h>
 #include <vlc/vlc.h>
 
@@ -25,5 +27,6 @@ ssize_t vlc_in_read(void *buf, size_t len);
 
 void vlc_in_write_icy(void);
 
-#endif
+#  endif // VLC_INPUT
+#endif // __VLC_INPUT_H_
 

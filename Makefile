@@ -1,3 +1,5 @@
+# Set this to 0 to disable compiling the libvlc input
+ENABLE_INPUT_VLC=1
 
 CC = gcc
 
@@ -75,8 +77,16 @@ PG = -g -fomit-frame-pointer
 # Optimize flag.
 OPTIM = -O2
 
+ifeq (${ENABLE_INPUT_VLC},1)
+	VLC_CFLAGS=-DVLC_INPUT
+	VLC_LDFLAGS=-lvlc
+else
+	VLC_CFLAGS=
+	VLC_LDFLAGS=
+endif
+
 # These flags are pretty much mandatory
-REQUIRED = -DINLINE= ${GIT_VER}
+REQUIRED = -DINLINE= ${GIT_VER} ${VLC_CFLAGS}
 
 #pick your architecture
 ARCH = -march=native
@@ -102,7 +112,7 @@ CC_SWITCHES = $(OPTIM) $(REQUIRED) $(ARCH) $(PG) $(TWEAKS) $(WARNINGS) $(NEW_02L
 
 PGM = toolame
 
-LIBS =  -lm -lzmq -ljack -lpthread -lvlc
+LIBS =  -lm -lzmq -ljack -lpthread ${VLC_LDFLAGS}
 
 #nick burch's OS/2 fix  gagravarr@SoftHome.net
 UNAME = $(shell uname)
