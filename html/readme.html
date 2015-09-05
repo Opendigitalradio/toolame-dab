@@ -98,7 +98,7 @@ Output Options
 		'j' joint stereo
 		'm' mono
 
-	-p [int]
+	-y [int]
 		which psy model to use (default '1')
 		Different models for the psychoacoustics
 	        Models: -1 to 4
@@ -150,14 +150,14 @@ Misc
 	and using the default psychoacoustic model (model 1)</p>
 
 <pre>
-	toolame -p 2 -v 5 sound.wav newfile.mp2
+	toolame -y 2 -v 5 sound.wav newfile.mp2
 </pre>
 	Encode sound.wav to newfile.mp2 using psychoacoustic model 2 and encoding
 	with variable bitrate. The high value of the "-v" argument means that 
 	the encoding will tend to favour higher bitrates.</p>
 
 <pre>
-	toolame -p 2 -v -5 sound.wav newfile.mp2
+	toolame -y 2 -v -5 sound.wav newfile.mp2
 </pre>
 	Same as example above, except that the negative value of the "-v" argument
 	means that the lower bitrates will be favoured over the higher ones.</p>
@@ -202,6 +202,8 @@ Misc
 <LI> Nicolas Croiset - ncroiset at vdl.fr - DAB length control, ignore 4GB limit when reading from stdin, fixed bitstream ending to allow concatenation of mp2 files, fixes for psycho1 model [02k]
 
 <LI> Mike Cheng mikecheng at NOT planckenergy.com - Most of the rest 
+
+<LI> data path - Update to build with g++ on linux and windows cygwin (g++ needed to link with ZeroMQ on cygwin)
 
 </UL>
 

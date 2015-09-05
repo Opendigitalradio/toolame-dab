@@ -122,9 +122,9 @@ void psycho_1_read_cbound (int lay, int freq)
   }
 }
 
-void psycho_1_read_freq_band (ltg, lay, freq)	/* this function reads in   */
-     int lay, freq;		/* frequency bands and bark */
-     g_ptr *ltg;		/* values                   */
+/*     int lay, freq;*/		/* frequency bands and bark */
+/*     g_ptr *ltg;   */		/* values                   */
+void psycho_1_read_freq_band (g_ptr *ltg, int lay, int freq)	/* this function reads in   */
 {
 
 #include "freqtable.h"

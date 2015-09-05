@@ -8,12 +8,12 @@
 #include "fft.h"
 #include "psycho_2.h"
 
-/* The static variables "r", "phi_sav", "new", "old" and "oldest" have    */
+/* The static variables "r", "phi_sav", "fresh", "old" and "oldest" have    */
 /* to be remembered for the unpredictability measure.  For "r" and        */
 /* "phi_sav", the first index from the left is the channel select and     */
 /* the second index is the "age" of the data.                             */
 
-static int new = 0, old = 1, oldest = 0;
+static int fresh = 0, old = 1, oldest = 0;
 static int init = 0, flush, sync_flush, syncsize, sfreq_idx;
 
 /* The following static variables are constants.                           */
@@ -96,11 +96,11 @@ void psycho_2 (short int *buffer, short int savebuf[1056], int chn,
     /*for layer 1 computations, for the layer 2 double computations, the pointers */
     /*are reset automatically on the second pass                                 */
     {
-      if (new == 0) {
-	new = 1;
+      if (fresh == 0) {
+	fresh = 1;
 	oldest = 1;
       } else {
-	new = 0;
+	fresh = 0;
 	oldest = 0;
       }
       if (old == 0)
@@ -111,8 +111,8 @@ void psycho_2 (short int *buffer, short int savebuf[1056], int chn,
     for (j = 0; j < HBLKSIZE; j++) {
       r_prime = 2.0 * r[chn][old][j] - r[chn][oldest][j];
       phi_prime = 2.0 * phi_sav[chn][old][j] - phi_sav[chn][oldest][j];
-      r[chn][new][j] = sqrt ((double) energy[j]);
-      phi_sav[chn][new][j] = phi[j];
+      r[chn][fresh][j] = sqrt ((double) energy[j]);
+      phi_sav[chn][fresh][j] = phi[j];
 #ifdef SINCOS
       {
 	// 12% faster
@@ -120,19 +120,19 @@ void psycho_2 (short int *buffer, short int savebuf[1056], int chn,
 	double sphi, cphi, sprime, cprime;
 	__sincos ((double) phi[j], &sphi, &cphi);
 	__sincos ((double) phi_prime, &sprime, &cprime);
-	temp1 = r[chn][new][j] * cphi - r_prime * cprime;
-	temp2 = r[chn][new][j] * sphi - r_prime * sprime;
+	temp1 = r[chn][fresh][j] * cphi - r_prime * cprime;
+	temp2 = r[chn][fresh][j] * sphi - r_prime * sprime;
       }
 #else
       temp1 =
-	r[chn][new][j] * cos ((double) phi[j]) -
+	r[chn][fresh][j] * cos ((double) phi[j]) -
 	r_prime * cos ((double) phi_prime);
       temp2 =
-	r[chn][new][j] * sin ((double) phi[j]) -
+	r[chn][fresh][j] * sin ((double) phi[j]) -
 	r_prime * sin ((double) phi_prime);
 #endif
 
-      temp3 = r[chn][new][j] + fabs ((double) r_prime);
+      temp3 = r[chn][fresh][j] + fabs ((double) r_prime);
       if (temp3 != 0)
 	c[j] = sqrt (temp1 * temp1 + temp2 * temp2) / temp3;
       else
@@ -419,9 +419,7 @@ void psycho_2_init (double sfreq)
 
 }
 
-void psycho_2_read_absthr (absthr, table)
-     FLOAT *absthr;
-     int table;
+void psycho_2_read_absthr (FLOAT *absthr, int table)
 {
   int j;
 #include "absthr.h"

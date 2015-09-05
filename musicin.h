@@ -25,7 +25,7 @@
 
 extern int cont_flag;
 
-#define e              2.71828182845
+//#define e              2.71828182845
 
 #define CBLIMIT       21
 

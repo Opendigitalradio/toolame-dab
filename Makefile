@@ -4,6 +4,7 @@ ENABLE_INPUT_VLC=1
 # Set this to 0 to disable compiling the JACK input
 ENABLE_INPUT_JACK=1
 
+# use gcc or g++, on windows/cygwin use g++ to link with zmq
 CC = gcc
 
 HEADERS = \
