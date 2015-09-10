@@ -58,7 +58,7 @@ find_package(Threads REQUIRED)
 # libzmq
 pkg_check_modules(ZMQ libzmq>=4.0 REQUIRED)
 if(NOT ZMQ_FOUND)
-    message(FATAL_ERROR "libmzq required to compile toolame-dab \n")
+    message(FATAL_ERROR "libzmq required to compile Toolame-DAB \n")
 endif()
 include_directories(${ZMQ_INCLUDE_DIRS})
 
@@ -84,7 +84,7 @@ option(ENABLE_INPUT_JACK
 
 if(ENABLE_INPUT_VLC)
     if(NOT VLC_FOUND)
-        message(FATAL_ERROR "libvlc required to compile toolame-dab with ENABLE_INPUT_VLC \n")
+        message(FATAL_ERROR "libvlc required to compile Toolame-DAB with ENABLE_INPUT_VLC \n")
     endif()
     add_definitions(-DVLC_INPUT)
     include_directories(${VLC_INCLUDE_DIRS})
@@ -94,7 +94,7 @@ endif()
 
 if(ENABLE_INPUT_JACK)
     if(NOT JACK_FOUND)
-        message(FATAL_ERROR "libjack required to compile toolame-dab with ENABLE_INPUT_JACK \n")
+        message(FATAL_ERROR "libjack required to compile Toolame-DAB with ENABLE_INPUT_JACK \n")
     endif()
     add_definitions(-DJACK_INPUT)
     include_directories(${JACK_INCLUDE_DIRS})
