@@ -83,7 +83,7 @@ option(ENABLE_INPUT_JACK
 
 
 if(ENABLE_INPUT_VLC)
-    if(NOT LIBVLC_FOUND)
+    if(NOT VLC_FOUND)
         message(FATAL_ERROR "libvlc required to compile toolame-dab with ENABLE_INPUT_VLC \n")
     endif()
     add_definitions(-DVLC_INPUT)
