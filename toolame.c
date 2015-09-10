@@ -216,8 +216,16 @@ int main (int argc, char **argv)
                 // no PAD available
             }
             else if (xpad_len == header.dab_length + 1) {
+//#define XPAD_DEBUG
+#ifdef XPAD_DEBUG
+                fprintf(stderr, "XPAD:");
+                for (i = 0; i < xpad_len; i++)
+                    fprintf(stderr, " %02X", xpad_data[i]);
+                fprintf(stderr, "\n");
+#endif
                 // everything OK
                 xpad_len = xpad_data[header.dab_length];
+                assert(xpad_len > 2);
             }
             else {
                 fprintf(stderr, "xpad length=%d\n", xpad_len);
