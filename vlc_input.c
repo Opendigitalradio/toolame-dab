@@ -44,7 +44,7 @@ pthread_mutex_t buffer_lock = PTHREAD_MUTEX_INITIALIZER;
 struct vlc_buffer* vlc_buffer_new()
 {
     struct vlc_buffer* node;
-    node = malloc(sizeof(struct vlc_buffer));
+    node = (struct vlc_buffer *)malloc(sizeof(struct vlc_buffer));
     memset(node, 0, sizeof(struct vlc_buffer));
     return node;
 }
@@ -74,7 +74,7 @@ void prepareRender_size_t(
         uint8_t** pp_pcm_buffer,
         size_t size)
 {
-    *pp_pcm_buffer = malloc(size);
+    *pp_pcm_buffer = (uint8_t *)malloc(size);
 }
 
 void prepareRender(
@@ -82,7 +82,7 @@ void prepareRender(
         uint8_t** pp_pcm_buffer,
         unsigned int size)
 {
-    *pp_pcm_buffer = malloc(size);
+    *pp_pcm_buffer = (uint8_t *)malloc(size);
 }
 
 
@@ -290,7 +290,7 @@ ssize_t vlc_in_read(void *buf, size_t len)
 
                 // split the current head into two parts
                 size_t remaining = head_buffer->size - len;
-                uint8_t *newbuf = malloc(remaining);
+                uint8_t *newbuf = (uint8_t *)malloc(remaining);
 
                 memcpy(newbuf, head_buffer->buf + len, remaining);
                 free(head_buffer->buf);
@@ -326,7 +326,7 @@ ssize_t vlc_in_read(void *buf, size_t len)
 // This task is run in a separate thread
 void* vlc_in_write_icy_task(void* arg)
 {
-    struct icywriter_task_data* data = arg;
+    struct icywriter_task_data* data = (struct icywriter_task_data *)arg;
 
     FILE* fd = fopen(vlc_nowplaying_filename, "wb");
     if (fd) {

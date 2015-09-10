@@ -36,12 +36,12 @@ that much difference to the final SNR values, but it's something worth trying
 ****************************************************************/
 
 
-/* The static variables "r", "phi_sav", "new", "old" and "oldest" have    
+/* The static variables "r", "phi_sav", "fresh", "old" and "oldest" have
  to be remembered for the unpredictability measure.  For "r" and        
  "phi_sav", the first index from the left is the channel select and     
  the second index is the "age" of the data.                             */
 
-static int new = 0, old = 1, oldest = 0;
+static int fresh = 0, old = 1, oldest = 0;
 static int init = 0;
 
 /* NMT is a constant 5.5dB. ISO11172 Sec D.2.4.h */
@@ -160,13 +160,13 @@ void psycho_4 (short int *buffer, short int savebuf[1056], int chn,
     psycho_2_fft (wsamp_r, energy, phi);
 
     /* calculate the unpredictability measure, given energy[f] and phi[f] 
-       (the age pointers [new/old/oldest] are reset automatically on the second pass */
+       (the age pointers [fresh/old/oldest] are reset automatically on the second pass */
     {
-      if (new == 0) {
-	new = 1;
+      if (fresh == 0) {
+	fresh = 1;
 	oldest = 1;
       } else {
-	new = 0;
+	fresh = 0;
 	oldest = 0;
       }
       if (old == 0)
@@ -181,22 +181,22 @@ void psycho_4 (short int *buffer, short int savebuf[1056], int chn,
       r_prime = 2.0 * r[chn][old][j] - r[chn][oldest][j];
       phi_prime = 2.0 * phi_sav[chn][old][j] - phi_sav[chn][oldest][j];
 
-      r[chn][new][j] = sqrt ((double) energy[j]);
-      phi_sav[chn][new][j] = phi[j];	
+      r[chn][fresh][j] = sqrt ((double) energy[j]);
+      phi_sav[chn][fresh][j] = phi[j];
   
       {
 	temp1 =
-	  r[chn][new][j] * psycho_4_cos(phi[j]) -
+	  r[chn][fresh][j] * psycho_4_cos(phi[j]) -
 	  r_prime * psycho_4_cos(phi_prime);
 	temp2 =
-	  r[chn][new][j] * psycho_4_sin(phi[j]) -
+	  r[chn][fresh][j] * psycho_4_sin(phi[j]) -
 	  r_prime * psycho_4_sin(phi_prime); 
 	//fprintf(stdout,"[%5.2f %5.2f] [%5.2f %5.2f]\n",temp1, mytemp1, temp2, mytemp2);
 
       }
 
 
-      temp3 = r[chn][new][j] + fabs ((double) r_prime);
+      temp3 = r[chn][fresh][j] + fabs ((double) r_prime);
       if (temp3 != 0)
 	c[j] = sqrt (temp1 * temp1 + temp2 * temp2) / temp3;
       else
@@ -206,18 +206,18 @@ void psycho_4 (short int *buffer, short int savebuf[1056], int chn,
       r_prime = 2.0 * r[chn][old][j] - r[chn][oldest][j];
       phi_prime = 2.0 * phi_sav[chn][old][j] - phi_sav[chn][oldest][j];
 
-      r[chn][new][j] = sqrt ((double) energy[j]);
-      phi_sav[chn][new][j] = phi[j];	
+      r[chn][fresh][j] = sqrt ((double) energy[j]);
+      phi_sav[chn][fresh][j] = phi[j];
 
 
       temp1 =
-	r[chn][new][j] * cos ((double) phi[j]) -
+	r[chn][fresh][j] * cos ((double) phi[j]) -
 	r_prime * cos ((double) phi_prime);
       temp2 =
-	r[chn][new][j] * sin ((double) phi[j]) -
+	r[chn][fresh][j] * sin ((double) phi[j]) -
 	r_prime * sin ((double) phi_prime);      
 
-      temp3 = r[chn][new][j] + fabs ((double) r_prime);
+      temp3 = r[chn][fresh][j] + fabs ((double) r_prime);
       if (temp3 != 0)
 	c[j] = sqrt (temp1 * temp1 + temp2 * temp2) / temp3;
       else

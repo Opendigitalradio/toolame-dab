@@ -1,8 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#if defined(JACK_INPUT)
 #include <jack/jack.h>
 #include <jack/ringbuffer.h>
+#endif
 #include "common.h"
 #include "encoder.h"
 #include "musicin.h"
@@ -29,6 +31,7 @@
 
 #include <assert.h>
 
+options glopts;
 music_in_t musicin;
 Bit_stream_struc bs;
 char *programName;
@@ -192,7 +195,7 @@ int main (int argc, char **argv)
             return 1;
         }
 
-        xpad_data = malloc(header.dab_length + 1);
+        xpad_data = (uint8_t *)malloc(header.dab_length + 1);
     }
 
     /* this will load the alloc tables and do some other stuff */
@@ -903,9 +906,11 @@ void parse_args (int argc, char **argv, frame_info * frame, int *psy,
                             err = 1;
                         break;
 
+#if defined(JACK_INPUT)
                     case 'j':
                         glopts.input_select = INPUT_SELECT_JACK;
                         break;
+#endif
 
                     case 'b':
                         argUsed = 1;
@@ -977,9 +982,11 @@ void parse_args (int argc, char **argv, frame_info * frame, int *psy,
                         header->mode = MPG_MD_STEREO; /* force stereo mode */
                         header->mode_ext = 0;
                         break;
+#if defined(VLC_INPUT)
                     case 'V':
                         glopts.input_select = INPUT_SELECT_VLC;
                         break;
+#endif
                     case 'W':
                         argUsed = 1;
                         *icy_file = arg;
