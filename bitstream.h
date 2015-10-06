@@ -9,7 +9,7 @@ unsigned int get1bit (Bit_stream_struc *);
 void put1bit (Bit_stream_struc *, int);
 unsigned long look_ahead (Bit_stream_struc *, int);
 unsigned long getbits (Bit_stream_struc *, int);
-INLINE void putbits (Bit_stream_struc *, unsigned int, int);
+extern INLINE void putbits (Bit_stream_struc *, unsigned int, int);
 void byte_ali_putbits (Bit_stream_struc *, unsigned int, int);
 unsigned long byte_ali_getbits (Bit_stream_struc *, int);
 unsigned long sstell (Bit_stream_struc *);
