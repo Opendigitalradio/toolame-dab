@@ -31,7 +31,6 @@
 
 #include <assert.h>
 
-options glopts;
 music_in_t musicin;
 Bit_stream_struc bs;
 char *programName;
@@ -176,10 +175,14 @@ int main (int argc, char **argv)
 
     programName = argv[0];
     if (argc == 1)		/* no command-line args */
-        short_usage ();
+    {
+        short_usage();
+    }
     else
+    {
         parse_args (argc, argv, &frame, &model, &num_samples, original_file_name,
                 encoded_file_name, &mot_file, &icy_file);
+    }
     print_config (&frame, &model, original_file_name, encoded_file_name);
 
     uint8_t* xpad_data = NULL;
@@ -195,7 +198,7 @@ int main (int argc, char **argv)
             return 1;
         }
 
-        xpad_data = (uint8_t *)malloc(header.dab_length + 1);
+        xpad_data = malloc(header.dab_length + 1);
     }
 
     /* this will load the alloc tables and do some other stuff */

@@ -25,6 +25,6 @@ typedef struct
 }
 options;
 
-extern options glopts;
+options glopts;
 #endif
 

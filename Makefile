@@ -4,8 +4,8 @@ ENABLE_INPUT_VLC=1
 # Set this to 0 to disable compiling the JACK input
 ENABLE_INPUT_JACK=1
 
-# use gcc or g++, on windows/cygwin use g++ to link with zmq
 CC = gcc
+CPP = g++
 
 HEADERS = \
 	absthr.h \
@@ -139,7 +139,7 @@ endif
 	$(CC) $(CC_SWITCHES) -c $< -o $@
 
 $(PGM):	$(OBJ) $(HEADERS) Makefile
-	$(CC) $(PG) -o $(PGM) $(OBJ) $(LIBS)
+	$(CPP) $(PG) -o $(PGM) $(OBJ) $(LIBS)
 
 clean:
 	-rm $(OBJ) $(DEP) $(PGM)

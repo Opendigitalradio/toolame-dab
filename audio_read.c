@@ -134,8 +134,8 @@ int process(jack_nframes_t nframes, void *arg) {
     //jack_thread_info_t *info = (jack_thread_info_t *) arg;
 
     jack_default_audio_sample_t *in_left, *in_right;
-    in_left = (jack_default_audio_sample_t *)jack_port_get_buffer(input_port_left, nframes);
-    in_right = (jack_default_audio_sample_t *)jack_port_get_buffer(input_port_right, nframes);
+    in_left = jack_port_get_buffer(input_port_left, nframes);
+    in_right = jack_port_get_buffer(input_port_right, nframes);
 
     /* Sndfile requires interleaved data.  It is simpler here to
      * just queue interleaved samples to a single ringbuffer. */
@@ -194,7 +194,9 @@ unsigned long read_samples (music_in_t* musicin, short sample_buffer[2304],
     static unsigned long samples_to_read;
     static char init = TRUE;
 
+#if defined(JACK_INPUT)
     void* jack_sample_buffer;
+#endif // defined(JACK_INPUT)
 
     if (init) {
         samples_to_read = num_samples;
@@ -222,7 +224,7 @@ unsigned long read_samples (music_in_t* musicin, short sample_buffer[2304],
         }
 
         jack_sample_buffer = malloc(f * (int)samples_read);
-        int bytes_read = jack_ringbuffer_read(rb, (char *)jack_sample_buffer, f * (int)samples_read);
+        int bytes_read = jack_ringbuffer_read(rb, jack_sample_buffer, f * (int)samples_read);
         //fprintf(stderr, " read_bytes / f = %d, should be %d\n", (int)bytes_read/f, samples_read);
         samples_read = bytes_read / f;
         if (bytes_read % f != 0) {

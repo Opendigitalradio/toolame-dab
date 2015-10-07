@@ -57,7 +57,8 @@
 # define FloatToUnsigned(f)	((unsigned long)(((long)((f) - 2147483648.0)) + 2147483647L + 1))
 # define UnsignedToFloat(u)	(((double)((long)((u) - 2147483647L - 1))) + 2147483648.0)
 
-double ConvertFromIeeeExtended (char *bytes)
+double ConvertFromIeeeExtended (bytes)
+     char *bytes;
 {
   double f;
   long expon;

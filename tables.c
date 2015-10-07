@@ -57,7 +57,9 @@ int pick_table (frame_info * frame)
  *
  **********************************************************************/
 
-int read_bit_alloc (int table, al_table *alloc)	/* read in table, return # subbands */
+int read_bit_alloc (table, alloc)	/* read in table, return # subbands */
+     int table;
+     al_table *alloc;
 {
 
   static const int startindex_subband[5] = { 0, 290, 592, 674, 788 };

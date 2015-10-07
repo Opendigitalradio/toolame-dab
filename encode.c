@@ -211,7 +211,7 @@ void transmission_pattern (unsigned int scalar[2][3][SBLIMIT],
   int nch = frame->nch;
   int sblimit = frame->sblimit;
   int dscf[2];
-  int klass[2], i, j, k;
+  int class[2], i, j, k;
   static int pattern[5][5] = { {0x123, 0x122, 0x122, 0x133, 0x123},
   {0x113, 0x111, 0x111, 0x444, 0x113},
   {0x111, 0x111, 0x111, 0x333, 0x113},
@@ -225,17 +225,17 @@ void transmission_pattern (unsigned int scalar[2][3][SBLIMIT],
       dscf[1] = (scalar[k][1][i] - scalar[k][2][i]);
       for (j = 0; j < 2; j++) {
 	if (dscf[j] <= -3)
-	  klass[j] = 0;
+	  class[j] = 0;
 	else if (dscf[j] > -3 && dscf[j] < 0)
-	  klass[j] = 1;
+	  class[j] = 1;
 	else if (dscf[j] == 0)
-	  klass[j] = 2;
+	  class[j] = 2;
 	else if (dscf[j] > 0 && dscf[j] < 3)
-	  klass[j] = 3;
+	  class[j] = 3;
 	else
-	  klass[j] = 4;
+	  class[j] = 4;
       }
-      switch (pattern[klass[0]][klass[1]]) {
+      switch (pattern[class[0]][class[1]]) {
       case 0x123:
 	scfsi[k][i] = 0;
 	break;

@@ -224,9 +224,6 @@ Matthias P. Braendli <matthias@mpb.li>
     PAD insertion for DLS and slides
     JACK and libVLC input
 
-data path <|)/\T/\2P/\T|-|@G|\/|/\||_.(()|\/|>
-    update to build with g++ on linux and windows cygwin (g++ needed to link with ZeroMQ on cygwin)
-
 *********************
 REFERENCE PAPERS
 *********************

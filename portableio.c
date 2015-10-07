@@ -59,7 +59,8 @@
 /****************************************************************
  * Big/little-endian independent I/O routines.
  ****************************************************************/
-int Read16BitsHighLow (FILE *fp)
+int Read16BitsHighLow (fp)
+     FILE *fp;
 {
   int first, second, result;
 
@@ -74,7 +75,8 @@ int Read16BitsHighLow (FILE *fp)
   return (result);
 }
 
-double ReadIeeeExtendedHighLow (FILE *fp)
+double ReadIeeeExtendedHighLow (fp)
+     FILE *fp;
 {
   char bits[kExtendedLength];
 
@@ -82,7 +84,8 @@ double ReadIeeeExtendedHighLow (FILE *fp)
   return ConvertFromIeeeExtended (bits);
 }
 
-int Read32BitsHighLow (FILE *fp)
+int Read32BitsHighLow (fp)
+     FILE *fp;
 {
   int first, second, result;
 
@@ -97,7 +100,10 @@ int Read32BitsHighLow (FILE *fp)
   return (result);
 }
 
-void ReadBytes (FILE *fp, char *p, int n)
+void ReadBytes (fp, p, n)
+     FILE *fp;
+     char *p;
+     int n;
 {
   while (!feof (fp) & (n-- > 0))
     *p++ = getc (fp);

@@ -73,7 +73,7 @@ int zmqoutput_write_byte(Bit_stream_struc *bs, unsigned char data)
         int frame_length = sizeof(struct zmq_frame_header) + zmqbuf_len;
 
         struct zmq_frame_header* header =
-            (struct zmq_frame_header *)malloc(frame_length);
+            malloc(frame_length);
 
         uint8_t* txframe = ((uint8_t*)header) + sizeof(struct zmq_frame_header);
 
