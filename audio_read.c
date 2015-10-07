@@ -194,7 +194,9 @@ unsigned long read_samples (music_in_t* musicin, short sample_buffer[2304],
     static unsigned long samples_to_read;
     static char init = TRUE;
 
+#if defined(JACK_INPUT)
     void* jack_sample_buffer;
+#endif // defined(JACK_INPUT)
 
     if (init) {
         samples_to_read = num_samples;

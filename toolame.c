@@ -1,8 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#if defined(JACK_INPUT)
 #include <jack/jack.h>
 #include <jack/ringbuffer.h>
+#endif
 #include "common.h"
 #include "encoder.h"
 #include "musicin.h"
@@ -173,10 +175,14 @@ int main (int argc, char **argv)
 
     programName = argv[0];
     if (argc == 1)		/* no command-line args */
-        short_usage ();
+    {
+        short_usage();
+    }
     else
+    {
         parse_args (argc, argv, &frame, &model, &num_samples, original_file_name,
                 encoded_file_name, &mot_file, &icy_file);
+    }
     print_config (&frame, &model, original_file_name, encoded_file_name);
 
     uint8_t* xpad_data = NULL;
@@ -911,9 +917,11 @@ void parse_args (int argc, char **argv, frame_info * frame, int *psy,
                             err = 1;
                         break;
 
+#if defined(JACK_INPUT)
                     case 'j':
                         glopts.input_select = INPUT_SELECT_JACK;
                         break;
+#endif
 
                     case 'b':
                         argUsed = 1;
@@ -985,9 +993,11 @@ void parse_args (int argc, char **argv, frame_info * frame, int *psy,
                         header->mode = MPG_MD_STEREO; /* force stereo mode */
                         header->mode_ext = 0;
                         break;
+#if defined(VLC_INPUT)
                     case 'V':
                         glopts.input_select = INPUT_SELECT_VLC;
                         break;
+#endif
                     case 'W':
                         argUsed = 1;
                         *icy_file = arg;

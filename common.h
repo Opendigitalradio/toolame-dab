@@ -89,7 +89,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#if defined(JACK_INPUT)
 #include <jack/jack.h>
+#endif
 
 /* Structure for Reading Layer II Allocation Tables from File */
 
@@ -169,8 +171,10 @@ typedef struct music_in_s
     /* Data for the wav input */
     FILE* wav_input;
 
+#if defined(JACK_INPUT)
     /* Data for the jack input */
     jack_client_t* jack_client;
+#endif
     const char*    jack_name;
 } music_in_t;
 

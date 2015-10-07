@@ -5,6 +5,7 @@ ENABLE_INPUT_VLC=1
 ENABLE_INPUT_JACK=1
 
 CC = gcc
+CPP = g++
 
 HEADERS = \
 	absthr.h \
@@ -138,7 +139,7 @@ endif
 	$(CC) $(CC_SWITCHES) -c $< -o $@
 
 $(PGM):	$(OBJ) $(HEADERS) Makefile
-	$(CC) $(PG) -o $(PGM) $(OBJ) $(LIBS)
+	$(CPP) $(PG) -o $(PGM) $(OBJ) $(LIBS)
 
 clean:
 	-rm $(OBJ) $(DEP) $(PGM)
