@@ -275,9 +275,6 @@ int main (int argc, char **argv)
         adb = available_bits (&header, &glopts);
         lg_frame = adb / 8;
         if (header.dab_extension) {
-            /* in 24 kHz we always have 4 bytes */
-            if (header.sampling_frequency == 1)
-                header.dab_extension = 4;
             /* You must have one frame in memory if you are in DAB mode                 */
             /* in conformity of the norme ETS 300 401 http://www.etsi.org               */
             /* see bitstream.c            */
@@ -1034,19 +1031,9 @@ void parse_args (int argc, char **argv, frame_info * frame, int *psy,
 
     /* Always enable DAB mode */
     header->error_protection = TRUE;
-    header->dab_extension = 2;
+    header->dab_extension = 4;
     header->padding = 0;
     glopts.dab = TRUE;
-
-    if (header->dab_extension) {
-        /* in 48 kHz */
-        /* if the bit rate per channel is less then 56 kbit/s, we have 2 scf-crc */
-        /* else we have 4 scf-crc */
-        /* in 24 kHz, we have 4 scf-crc, see main loop */
-        if (brate / (header->mode == MPG_MD_MONO ? 1 : 2) >= 56)
-            header->dab_extension = 4;
-    }
-
 
     if (err)
         usage ();			/* If err has occured, then call usage() */
@@ -1112,6 +1099,15 @@ void parse_args (int argc, char **argv, frame_info * frame, int *psy,
     /* Check to see we have a sane value for the bitrate for this version */
     if ((header->bitrate_index = BitrateIndex (brate, header->version)) < 0)
         err = 1;
+
+    if (header->dab_extension) {
+        /* in 48 kHz (= MPEG-1) */
+        /* if the bit rate per channel is less then 56 kbit/s, we have 2 scf-crc */
+        /* else we have 4 scf-crc */
+        /* in 24 kHz (= MPEG-2), we have 4 scf-crc */
+        if (header->version == MPEG_AUDIO_ID && (brate / (header->mode == MPG_MD_MONO ? 1 : 2) < 56))
+            header->dab_extension = 2;
+    }
 
     bs.zmq_framesize = 3 * brate;
 
