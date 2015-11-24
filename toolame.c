@@ -734,7 +734,18 @@ void short_usage (void)
     fprintf (stderr, "Toolame-DAB version %s\n (http://opendigitalradio.org)\n",
             toolameversion);
     fprintf (stderr, "MPEG Audio Layer II encoder for DAB\n\n");
+#if defined(JACK_INPUT) && defined(VLC_INPUT)
     fprintf (stderr, "USAGE: %s [options] (<infile>|-j <jackname>|-V <libvlc url>) [output]\n\n", programName);
+#elif defined(JACK_INPUT)
+    fprintf (stderr, "USAGE: %s [options] (<infile>|-j <jackname>) [output]\n\n", programName);
+    fprintf (stderr, "VLC input not compiled in\n");
+#elif defined(VLC_INPUT)
+    fprintf (stderr, "USAGE: %s [options] (<infile>|-V <libvlc url>) [output]\n\n", programName);
+    fprintf (stderr, "JACK input not compiled in\n");
+#else
+    fprintf (stderr, "USAGE: %s [options] <infile> [output]\n\n", programName);
+    fprintf (stderr, "Neither JACK nor libVLC input compiled in\n");
+#endif
     fprintf (stderr, "Try \"%s -h\" for more information.\n", programName);
     exit (0);
 }
