@@ -42,10 +42,11 @@ See http://opendigitalradio.org
 INSTALLATION
 *********************
 
-0. install zeromq 4.0.3 or newer. optional: install JACK and/or libvlc
-1. edit Makefile
-   set ENABLE_INPUT_JACK and ENABLE_INPUT_VLC accordingly.
-2. 'make'
+0. install zeromq 4.0.3 or newer, install cmake.
+   optional: install JACK and/or libvlc
+1. mkdir build
+2. cmake ..
+3. 'make'
 
 *********************
 USAGE
