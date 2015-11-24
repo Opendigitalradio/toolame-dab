@@ -4,6 +4,8 @@
 #  if defined(VLC_INPUT)
 
 #include <stdint.h>
+#include <stddef.h>
+#include <sys/types.h>
 #include <vlc/vlc.h>
 
 
