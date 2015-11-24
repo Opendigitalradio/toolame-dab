@@ -28,8 +28,10 @@ typedef struct IFF_AIFF_struct
 }
 IFF_AIFF;
 
+#if defined(JACK_INPUT)
 void setup_jack(frame_header *header, const char* jackname);
 int process(jack_nframes_t nframes, void *arg);
+#endif
 void jack_shutdown(void *arg);
 
 void parse_input_file (FILE *musicin, char *, frame_header *header, unsigned long *num_samples);

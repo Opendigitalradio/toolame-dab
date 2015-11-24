@@ -1,8 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <jack/jack.h>
-#include <jack/ringbuffer.h>
+#if defined(JACK_INPUT)
+#  include <jack/jack.h>
+#  include <jack/ringbuffer.h>
+#endif
 #include "common.h"
 #include "encoder.h"
 #include "musicin.h"
@@ -1052,10 +1054,10 @@ void parse_args (int argc, char **argv, frame_info * frame, int *psy,
     }
 
     if (glopts.input_select == INPUT_SELECT_JACK) {
+#if defined(JACK_INPUT)
         musicin.jack_name = inPath;
         *num_samples = MAX_U_32_NUM;
 
-#if defined(JACK_INPUT)
         setup_jack(header, musicin.jack_name);
 #else
         fprintf(stderr, "JACK input not compiled in\n");
