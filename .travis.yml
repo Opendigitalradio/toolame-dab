@@ -1,20 +1,12 @@
 language: c
 
-addons:
-  apt:
-    packages:
-      - libvlc-dev
-      - vlc-nox
-      - libjack-jackd2-dev
-      - libzmq3-dev
-      - libzmq3
-
-
 compiler:
   - gcc
   - clang
 
 before_script:
+  - sudo apt-get update -qq
+  - sudo apt-get install -y libvlc-dev vlc-nox libjack-jackd2-dev
   - pkg-config --modversion libzmq
 
 script:
