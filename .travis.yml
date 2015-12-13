@@ -9,14 +9,14 @@ before_install:
   - sudo apt-get install -y libvlc-dev vlc-nox libjack-jackd2-dev
 
 before_script:
-  - wget https://download.libsodium.org/libsodium/releases/LATEST.tar.gz -o /tmp/libsodium.tar.gz
-  - tar -f /tmp/libsodium.tar.gz -x
-  - pushd libsodium-*
+  - wget https://download.libsodium.org/libsodium/releases/libsodium-1.0.7.tar.gz
+  - tar -f libsodium-1.0.7.tar.gz -xv
+  - pushd libsodium-1.0.7
   - ./configure && make && sudo make install
   - popd
-  - wget http://download.zeromq.org/zeromq-4.1.3.tar.gz -o /tmp/zeromq.tar.gz
-  - tar -f /tmp/zeromq.tar.gz -x
-  - pushd zeromq-*
+  - wget http://download.zeromq.org/zeromq-4.1.3.tar.gz
+  - tar -f zeromq-4.1.3.tar.gz -xv
+  - pushd zeromq-4.1.3
   - ./configure && make && sudo make install
   - popd
 
