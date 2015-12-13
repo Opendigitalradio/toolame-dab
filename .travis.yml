@@ -6,8 +6,9 @@ compiler:
 
 before_script:
   - sudo apt-get update -qq
-  - sudo apt-get install -y libvlc-dev vlc-nox libjack-jackd2-dev
-  - pkg-config --modversion libzmq
+  - sudo apt-get install -y libvlc-dev vlc-nox libjack-jackd2-dev libzmq3-dev libzmq3
+  - pkg-config --modversion libzmq || true
+  - pkg-config --modversion libzmq3 || true
 
 script:
   - mkdir build
