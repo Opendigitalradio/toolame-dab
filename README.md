@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/Opendigitalradio/toolame-dab.svg?branch=master)](https://travis-ci.org/Opendigitalradio/toolame-dab)
 
 tooLAME - an optimized mpeg 1/2 layer 2 audio encoder with
 ODR-DabMux compatible ZeroMQ output and JACK input
