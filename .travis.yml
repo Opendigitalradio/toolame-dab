@@ -10,7 +10,7 @@ before_install:
 
 before_script:
   - wget https://download.libsodium.org/libsodium/releases/LATEST.tar.gz -o /tmp/libsodium.tar.gz
-  - tar -f /tmo/libsodium.tar.gz -x
+  - tar -f /tmp/libsodium.tar.gz -x
   - pushd libsodium-*
   - ./configure && make && sudo make install
   - popd
