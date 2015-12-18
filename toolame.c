@@ -236,10 +236,10 @@ int main (int argc, char **argv)
         }
 
         unsigned long j;
-        for (j = 0; j < samps_read; j++) {
+        for (j = 0; j < 1152; j++) {
             peak_left  = MAX(peak_left,  buffer[0][j]);
         }
-        for (j = 0; j < samps_read; j++) {
+        for (j = 0; j < 1152; j++) {
             peak_right = MAX(peak_right, buffer[1][j]);
         }
 
