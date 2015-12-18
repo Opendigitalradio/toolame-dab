@@ -357,17 +357,18 @@ void vlc_in_write_icy(void)
         int ret = sem_init(&icy_task_data.sem, 0, 0);
         if (ret == 0) {
             ret = pthread_create(&vlc_nowplaying_thread, NULL, vlc_in_write_icy_task, &icy_task_data);
+
+            if (ret == 0) {
+                vlc_nowplaying_running = 1;
+            }
+            else {
+                fprintf(stderr, "ICY Text writer: thread start failed: %s\n", strerror(ret));
+            }
         }
         else {
             fprintf(stderr, "ICY Text writer: semaphore init failed: %s\n", strerror(errno));
         }
 
-        if (ret == 0) {
-            vlc_nowplaying_running = 1;
-        }
-        else {
-            fprintf(stderr, "ICY Text writer: thread start failed: %s\n", strerror(ret));
-        }
     }
     else {
         int ret = sem_trywait(&icy_task_data.sem);
@@ -401,7 +402,7 @@ int check_vlc_uses_size_t()
     int retval = -1;
 
     char libvlc_version[256];
-    strncpy(libvlc_version, libvlc_get_version(), 256);
+    strncpy(libvlc_version, libvlc_get_version(), 255);
 
     char *space_position = strstr(libvlc_version, " ");
 
