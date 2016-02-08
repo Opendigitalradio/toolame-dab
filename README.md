@@ -46,8 +46,9 @@ INSTALLATION
 0. install zeromq 4.0.3 or newer, install cmake.
    optional: install JACK and/or libvlc
 1. mkdir build
-2. cmake ..
-3. 'make'
+2. cd build
+3. cmake ..
+4. 'make'
 
 *********************
 USAGE
